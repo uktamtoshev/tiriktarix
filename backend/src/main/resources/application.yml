@@ -1,0 +1,74 @@
+spring:
+  application:
+    name: tirik-tarix
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 12MB
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:tirik_tarix}
+    username: ${DB_USER:${USER}}
+    password: ${DB_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Asia/Tashkent
+  flyway:
+    enabled: true
+
+server:
+  port: 8080
+  error:
+    # Xato matni mijozga yetib borishi kerak: «Bu taxallus band», «Bu jihoz hali
+    # ochilmagan» — bularning hammasi bolaga o'zbekcha ko'rsatiladigan xabarlar.
+    # Ularsiz interfeysda quruq «API xatosi: 400» chiqadi.
+    include-message: always
+
+tirik-tarix:
+  cors:
+    # Vergul bilan ajratiladi. 3000 — standart `npm run dev`, 55708 — port band
+    # bo'lganda ishlatiladigan zaxira port.
+    allowed-origins: ${TIRIK_TARIX_CORS_ORIGINS:http://localhost:3000,http://localhost:55708}
+  chat:
+    # M1 qat'iy qoidalar: javob faqat tasdiqlangan fakt kartochkasidan
+    refusal-no-fact: "Bu haqda tarix sukut saqlaydi."
+    refusal-off-topic: "Iltimos, men haqimda savol ber."
+    # LLM (RAG): ANTHROPIC_API_KEY o'rnatilganda ishlaydi, aks holda kalit so'z rejimi
+    llm-model: ${TIRIK_TARIX_LLM_MODEL:claude-opus-4-8}
+  auth:
+    # Ishlab chiqarishda TIRIK_TARIX_JWT_SECRET albatta o'rnatilsin.
+    # Quyidagi qiymat faqat lokal ishlash uchun.
+    jwt-secret: ${TIRIK_TARIX_JWT_SECRET:tirik-tarix-dev-secret-key-change-me-in-production-0123456789}
+    token-days: 30
+    # Panel sessiyasi — bir ish kuni
+    admin-token-hours: ${TIRIK_TARIX_ADMIN_TOKEN_HOURS:12}
+  admin:
+    # Birinchi ishga tushirishda shu hisob yaratiladi. Keyin parolni paneldan
+    # almashtirish mumkin — qayta ishga tushirish uni tiklamaydi.
+    username: ${TIRIK_TARIX_ADMIN_USERNAME:admin}
+    password: ${TIRIK_TARIX_ADMIN_PASSWORD:tirik-tarix-dev-admin-change-me}
+    # Integratsiya kalitlarini (TTS/STT/LLM) shifrlash kaliti. Ishlab
+    # chiqarishda albatta o'zgartirilsin: kalit almashsa, bazadagi shifrlangan
+    # qiymatlarni o'qib bo'lmaydi va ularni paneldan qayta kiritish kerak.
+    secrets-key: ${TIRIK_TARIX_SECRETS_KEY:tirik-tarix-dev-secrets-key-change-me}
+  quiz:
+    micro-quiz-size: 10
+    era-test-size: 20
+    film-quiz-size: 10
+    xp-per-correct: 10
+  uploads:
+    # Metodist yuklagan portretlar shu papkada yotadi va backend ularni
+    # /uploads/** manzilida beradi. Bo'sh bo'lsa — ~/.tirik-tarix/uploads.
+    # DIQQAT: papka loyiha ichida bo'lmasin — `frontend/public/` ga yozish
+    # faqat lokalda ishlaydi, yig'ilgan saytda rasm ko'rinmaydi.
+    dir: ${TIRIK_TARIX_UPLOADS_DIR:}
+  voice:
+    # Ovoz yoqilgan ajdodlar: «*» — hammasi, yoki vergul bilan sluglar ro'yxati.
+    enabled-heroes: ${TIRIK_TARIX_VOICE_HEROES:*}
+    # Keshdagi eng ko'p yozuv (V150). Bir jumla ~20–60 KB, ya'ni 1000 ≈ 40 MB.
+    # 0 — keshni butunlay o'chiradi (har safar qaytadan sintez va qaytadan to'lov).
+    cache-entries: ${TIRIK_TARIX_VOICE_CACHE_ENTRIES:1000}

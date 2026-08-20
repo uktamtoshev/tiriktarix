@@ -1,0 +1,46 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "cwd": "frontend",
+      "port": 55708,
+      "autoPort": false
+    },
+    {
+      "name": "frontend-verify",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        "-p",
+        "55712"
+      ],
+      "cwd": "frontend",
+      "port": 55712,
+      "autoPort": false
+    },
+    {
+      "name": "frontend-prod",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start", "--", "-p", "55713"],
+      "cwd": "frontend",
+      "port": 55713,
+      "autoPort": false
+    },
+    {
+      "name": "backend",
+      "runtimeExecutable": "mvn",
+      "runtimeArgs": ["-q", "spring-boot:run"],
+      "cwd": "/Users/macbookair2020/Desktop/PROJECTS/TIRIK TARIX/backend",
+      "port": 8080,
+      "autoPort": false
+    }
+  ]
+}

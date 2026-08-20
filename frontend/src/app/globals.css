@@ -1,0 +1,610 @@
+@import "tailwindcss";
+
+/* =====================================================================
+   TIRIK TARIX — dizayn tizimi «TEMIR VA ZAR» (poʻlat va zar)
+   Metafora: tungi qalʼa-muzey. Tosh devor, zar naqsh, damashq poʻlati.
+   Hujjat: docs/dizayn_redesign_plan.md
+   ===================================================================== */
+
+:root {
+  /* ---- Tosh (asos) ---- */
+  --tt-obsidian: #0a0d13;
+  --tt-basalt: #111621;
+  --tt-steel: #1a2130;
+  --tt-steel-2: #262f42;
+
+  /* ---- Zar (asosiy urgʻu) ---- */
+  --tt-zar: #c8a247;
+  --tt-zar-bright: #f3d98b;
+  --tt-zar-deep: #7a5f1c;
+
+  /* ---- Maʼnoviy ranglar ---- */
+  --tt-feruza: #2e8a87;
+  --tt-feruza-bright: #4fc7c2;
+  --tt-qon: #9b2e22;
+  --tt-nil: #35507a;
+
+  /* ---- Matn va pergament ---- */
+  --tt-parchment: #ede2c8;
+  --tt-marble: #f7f2e6;
+  --tt-dust: #98a0b3;
+
+  /* ---- Radiuslar: tosh yumshoq boʻlmaydi ---- */
+  --tt-r-sm: 4px;
+  --tt-r-md: 8px;
+  --tt-r-lg: 14px;
+
+  /* ---- Chuqurlik: nisha soyasi + ichki zar yaltirashi ---- */
+  --tt-shadow-niche: 0 24px 60px -20px rgba(0, 0, 0, 0.8);
+  --tt-shadow-raised: 0 32px 70px -22px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(200, 162, 71, 0.18);
+  --tt-inset-gleam: inset 0 1px 0 rgba(243, 217, 139, 0.14);
+
+  /* ---- Harakat ---- */
+  --tt-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --tt-fast: 180ms;
+  --tt-slow: 700ms;
+  --tt-epic: 1200ms;
+
+  /* eski kod bilan moslik */
+  --background: var(--tt-obsidian);
+  --foreground: var(--tt-parchment);
+}
+
+@theme inline {
+  --color-background: var(--tt-obsidian);
+  --color-foreground: var(--tt-parchment);
+
+  --color-obsidian: var(--tt-obsidian);
+  --color-basalt: var(--tt-basalt);
+  --color-steel: var(--tt-steel);
+  --color-steel-2: var(--tt-steel-2);
+  --color-zar: var(--tt-zar);
+  --color-zar-bright: var(--tt-zar-bright);
+  --color-zar-deep: var(--tt-zar-deep);
+  --color-feruza: var(--tt-feruza);
+  --color-feruza-bright: var(--tt-feruza-bright);
+  --color-qon: var(--tt-qon);
+  --color-nil: var(--tt-nil);
+  --color-parchment: var(--tt-parchment);
+  --color-marble: var(--tt-marble);
+  --color-dust: var(--tt-dust);
+
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-cinzel);
+  --font-quote: var(--font-cormorant);
+
+  --radius-sm: var(--tt-r-sm);
+  --radius-md: var(--tt-r-md);
+  --radius-lg: var(--tt-r-lg);
+
+  --ease-tt: var(--tt-ease);
+}
+
+/* =====================================================================
+   Asos
+   ===================================================================== */
+
+body {
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -15%, rgba(200, 162, 71, 0.10), transparent 70%),
+    radial-gradient(ellipse 70% 45% at 85% 105%, rgba(46, 138, 135, 0.08), transparent 70%),
+    var(--tt-obsidian);
+  color: var(--tt-parchment);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* @layer base — muhim: qatlamsiz qoida Tailwind utility'laridan ustun turadi va
+   sarlavhaga qo'yilgan `text-*` sinfini bosib ketadi (pergamentdagi qora sarlavha
+   oqarib ketishi shundan edi). */
+@layer base {
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-cinzel), Georgia, serif;
+    letter-spacing: 0.06em;
+    color: var(--tt-marble);
+  }
+}
+
+::selection {
+  background: rgba(200, 162, 71, 0.32);
+  color: var(--tt-marble);
+}
+
+/* Fokus halqasi — klaviatura bilan yurish uchun.
+   Element turlari alohida sanaladi: shunda qoida brauzerning o'z halqasidan
+   ustun turadi va zar rang hamma joyda bir xil bo'ladi. */
+:focus-visible,
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--tt-zar-bright);
+  outline-offset: 3px;
+  border-radius: var(--tt-r-sm);
+}
+
+/* =====================================================================
+   Qatlam-teksturalar (hammasi SVG/CSS — rasm yuklanmaydi)
+   ===================================================================== */
+
+/* Girih — sharq sakkiz burchakli yulduzi, zar chiziqlar bilan */
+.tt-girih::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23c8a247' stroke-opacity='0.14' stroke-width='1'%3E%3Cpath d='M60 6 L72 48 L114 60 L72 72 L60 114 L48 72 L6 60 L48 48 Z'/%3E%3Cpath d='M60 22 L68 52 L98 60 L68 68 L60 98 L52 68 L22 60 L52 52 Z'/%3E%3Ccircle cx='60' cy='60' r='15'/%3E%3Ccircle cx='0' cy='0' r='18'/%3E%3Ccircle cx='120' cy='0' r='18'/%3E%3Ccircle cx='0' cy='120' r='18'/%3E%3Ccircle cx='120' cy='120' r='18'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 120px 120px;
+}
+
+.tt-girih-fine::before {
+  background-size: 64px 64px;
+  opacity: 0.6;
+}
+
+/* Poʻlat doni — nozik shovqin, metall sirti hissi */
+.tt-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* mix-blend-mode ataylab ishlatilmaydi: u qatlamni kompozitordan chiqarib
+     yuboradi va skrollda sahifa qotib qoladi. */
+  opacity: 0.22;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.45'/%3E%3C/svg%3E");
+}
+
+/* Vinyetka — mash'al yorugʻi effekti */
+.tt-vignette::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 75% 65% at 50% 40%, transparent 30%, rgba(5, 7, 11, 0.75) 100%);
+}
+
+/* =====================================================================
+   O'yma hoshiya (engraved) — ikki qavat zar chiziq
+   ===================================================================== */
+
+.tt-engraved {
+  position: relative;
+  border: 1px solid rgba(200, 162, 71, 0.28);
+  border-radius: var(--tt-r-lg);
+  box-shadow: var(--tt-shadow-niche), var(--tt-inset-gleam);
+}
+.tt-engraved::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 1px solid rgba(200, 162, 71, 0.16);
+  border-radius: calc(var(--tt-r-lg) - 4px);
+  pointer-events: none;
+}
+
+/* =====================================================================
+   Zar yaltirashi — metall ustidan yorugʻ chiziq (hover)
+   ===================================================================== */
+
+.tt-sweep {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.tt-sweep::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -60%;
+  width: 45%;
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    transparent,
+    rgba(243, 217, 139, 0.05) 35%,
+    rgba(243, 217, 139, 0.34) 50%,
+    rgba(243, 217, 139, 0.05) 65%,
+    transparent
+  );
+  transform: skewX(-16deg);
+  transition: left var(--tt-slow) var(--tt-ease);
+}
+.tt-sweep:hover::after,
+.tt-sweep:focus-visible::after {
+  left: 115%;
+}
+
+/* Doimiy yaltirash — asosiy CTA uchun */
+@keyframes tt-sweep-loop {
+  0% { transform: translateX(-160%) skewX(-16deg); }
+  55%, 100% { transform: translateX(320%) skewX(-16deg); }
+}
+.tt-sweep-loop {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.tt-sweep-loop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255, 250, 235, 0.5), transparent);
+  animation: tt-sweep-loop 4.5s var(--tt-ease) infinite;
+}
+
+/* =====================================================================
+   Zar nuri (glow) va yonish
+   ===================================================================== */
+
+@keyframes tt-ember {
+  0%, 100% {
+    box-shadow: 0 0 26px rgba(200, 162, 71, 0.28), 0 0 70px rgba(200, 162, 71, 0.10);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(243, 217, 139, 0.48), 0 0 110px rgba(200, 162, 71, 0.20);
+  }
+}
+.tt-ember { animation: tt-ember 3.4s ease-in-out infinite; }
+
+@keyframes tt-spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+/* Aylanish kompozitor qatlamida bajariladi. `will-change` ataylab yo'q:
+   sahnada allaqachon parallaks qatlamlari bor va yana bitta katta doimiy
+   qatlam kompozitor xotirasini to'ldirib, skrollni qotirib qo'yardi. */
+.tt-spin-slow {
+  animation: tt-spin-slow 160s linear infinite;
+  backface-visibility: hidden;
+}
+
+/* Chang zarralari — havoda suzuvchi nur */
+@keyframes tt-mote {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  15% { opacity: 0.7; }
+  85% { opacity: 0.5; }
+  100% { transform: translateY(-120px) translateX(28px); opacity: 0; }
+}
+.tt-mote {
+  animation: tt-mote 14s linear infinite;
+  will-change: transform, opacity;
+}
+
+/* =====================================================================
+   Kirish animatsiyalari — sekin, vazmin (monumental)
+   ===================================================================== */
+
+@keyframes tt-reveal {
+  from { opacity: 0; transform: translateY(26px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.tt-reveal { animation: tt-reveal var(--tt-slow) var(--tt-ease) both; }
+
+@keyframes tt-reveal-blur {
+  from { opacity: 0; transform: translateY(18px); filter: blur(6px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+.tt-reveal-blur { animation: tt-reveal-blur var(--tt-epic) var(--tt-ease) both; }
+
+@keyframes tt-rise {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
+}
+.tt-rise { animation: tt-rise var(--tt-slow) var(--tt-ease) both; }
+
+/* Xaritadagi yurish yoʻli chiziladi (pathLength="1" bilan ishlaydi) */
+@keyframes tt-draw-route {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+.tt-route {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: tt-draw-route 2.4s var(--tt-ease) both;
+}
+
+/* Zar chiziq chapdan oʻngga chiziladi (sarlavha ostidagi bezak) */
+@keyframes tt-draw {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.tt-draw { animation: tt-draw var(--tt-slow) var(--tt-ease) both; transform-origin: left center; }
+
+/* Eski sinflar bilan moslik (bosqichma-bosqich koʻchirish uchun) */
+.fade-up { animation: tt-reveal 0.55s var(--tt-ease) both; }
+.pop-in { animation: tt-rise 0.5s var(--tt-ease) both; }
+
+/* =====================================================================
+   Maskot Ilvirs — harakatlari saqlanadi
+   ===================================================================== */
+
+@keyframes mascot-pop {
+  0%   { transform: translateY(82%) scale(1.15, 0.75); }
+  45%  { transform: translateY(-14%) scale(0.9, 1.14); }
+  65%  { transform: translateY(5%) scale(1.08, 0.92); }
+  82%  { transform: translateY(-2%) scale(0.97, 1.04); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+.mascot-pop {
+  animation: mascot-pop 0.65s cubic-bezier(0.34, 1.2, 0.64, 1) both;
+  transform-origin: bottom center;
+}
+
+@keyframes mascot-duck {
+  0%   { transform: translateY(0) scale(1, 1); }
+  30%  { transform: translateY(-6%) scale(0.95, 1.06); }
+  100% { transform: translateY(74%) scale(1.05, 0.95); }
+}
+.mascot-duck {
+  animation: mascot-duck 0.5s cubic-bezier(0.5, 0, 0.6, 1) both;
+  transform-origin: bottom center;
+}
+
+@keyframes mascot-bounce {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-14px) rotate(-6deg); }
+  50% { transform: translateY(0) rotate(0deg); }
+  75% { transform: translateY(-10px) rotate(6deg); }
+}
+.mascot-bounce { animation: mascot-bounce 0.9s ease-in-out infinite; }
+
+@keyframes mascot-droop {
+  0%, 100% { transform: rotate(-4deg) translateY(2px); }
+  50% { transform: rotate(2deg) translateY(0); }
+}
+.mascot-droop { animation: mascot-droop 4s ease-in-out infinite; }
+
+@keyframes mascot-tear-fall {
+  0% { opacity: 0; transform: translateY(0); }
+  30% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(10px); }
+}
+.mascot-tear { animation: mascot-tear-fall 2.2s ease-in infinite; }
+
+@keyframes mascot-spark-pulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+.mascot-spark {
+  animation: mascot-spark-pulse 1s ease-in-out infinite;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
+/* Chat «yozmoqda…» nuqtalari */
+@keyframes bounce-dot {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40% { transform: translateY(-6px); opacity: 1; }
+}
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--tt-zar);
+  animation: bounce-dot 1.2s infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.typing-dot:nth-child(3) { animation-delay: 0.3s; }
+
+/* =====================================================================
+   Yordamchilar
+   ===================================================================== */
+
+/* Zar matn — sarlavhalarga quyma oltin effekti */
+.tt-gold-text {
+  background: linear-gradient(180deg, var(--tt-zar-bright) 0%, var(--tt-zar) 45%, var(--tt-zar-deep) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Pergament — oʻqiladigan zonalar (faktlar, chat, tahlil) */
+.tt-parchment-surface {
+  background:
+    radial-gradient(ellipse at 20% 10%, rgba(255, 255, 255, 0.5), transparent 60%),
+    linear-gradient(160deg, #efe5cd 0%, #e3d6b8 100%);
+  color: #2b2415;
+  border: 1px solid rgba(122, 95, 28, 0.35);
+  border-radius: var(--tt-r-md);
+  box-shadow: 0 12px 30px -12px rgba(0, 0, 0, 0.6);
+}
+
+/* Poʻlat sirt — asosiy karta materiali */
+.tt-steel-surface {
+  background: linear-gradient(158deg, var(--tt-steel) 0%, var(--tt-basalt) 60%, #0d1119 100%);
+}
+
+/* Vaqt oʻqi — zar chiziq */
+.tt-timeline-axis {
+  background: linear-gradient(90deg, transparent, var(--tt-zar-deep) 12%, var(--tt-zar) 50%, var(--tt-zar-deep) 88%, transparent);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--tt-obsidian); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--tt-zar-deep), var(--tt-zar));
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--tt-zar); }
+
+/* Gorizontal lentalar uchun scrollbar yashirish */
+.tt-no-scrollbar { scrollbar-width: none; }
+.tt-no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* =====================================================================
+   Flesh-karta — ikki tomonlama agʻdariladigan karta
+   -----------------------------------------------------------------
+   Metafora dialoglardan olingan: OLD tomon — oʻquvchining savoli
+   (poʻlat plita), ORQA tomon — tarixning javobi (pergament).
+   Faqat CSS 3D, hech qanday kutubxona qoʻshilmaydi.
+   ===================================================================== */
+
+.tt-flip {
+  perspective: 1600px;
+}
+
+.tt-flip-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 560ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.tt-flip[data-flipped="true"] .tt-flip-inner {
+  transform: rotateY(180deg);
+}
+
+.tt-flip-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: auto;
+}
+
+.tt-flip-back {
+  transform: rotateY(180deg);
+}
+
+/* =====================================================================
+   Gerb-shturval — seyf eshigi ochilgandek ikki marta aylanadi.
+   Oxirida ozgina ortga «tak» etib qaytadi — mexanik his (Header.tsx).
+   ===================================================================== */
+
+@keyframes tt-vault-spin-kf {
+  0% {
+    transform: rotate(0deg);
+  }
+  78% {
+    transform: rotate(742deg);
+  }
+  100% {
+    transform: rotate(720deg);
+  }
+}
+
+.tt-vault-spin {
+  animation: tt-vault-spin-kf 0.9s cubic-bezier(0.32, 0.05, 0.18, 1) both;
+  will-change: transform;
+}
+
+/* =====================================================================
+   Bo'limdan bo'limga o'tish — «quyosh pardasi» (NavSunburst.tsx).
+
+   TO'RT QATLAM, USTMA-UST TUSHMAYDI:
+     0) qorong'i parda — yangi sahifa uning ORQASIDA yuklanadi va ko'rinmaydi;
+     1) belgi aqldan ozgandek tez aylanib kattalashadi;
+     2) belgi BUTUNLAY yo'q bo'ladi — o'rnida kichkina oq dog' qoladi;
+     3) o'sha dog'dan quyosh yonib, butun ekranni oqartiradi va so'nadi —
+        sahifa aynan shu yorug'lik ichidan chiqadi.
+   Uchinchi qatlam ikkinchisi tugagandan KEYIN boshlanadi: aks holda oq
+   yorug'lik ichidan Sohibqironning qiyshaygan portreti ko'rinib turardi.
+
+   XAVFSIZLIK. Chaqnash BITTA va qisqa: tez-tez takrorlanadigan yorug'lik
+   yorug'likka sezgir bolalar uchun xavfli. Harakat kamaytirilgan rejimda
+   parda umuman chizilmaydi (Header.tsx da tekshiriladi).
+   ===================================================================== */
+
+/*
+  Parda: boshidan to'q, quyosh eng kuchli yonganda (≈65–78%) sezilmay yo'qoladi.
+  Shu sabab bola qorong'idan to'g'ri yorug'likka o'tadi, oradagi sahifani
+  ko'rmaydi — sahifa faqat nur so'ngach ochiladi.
+*/
+@keyframes tt-nav-veil-kf {
+  0%,
+  65% {
+    opacity: 1;
+  }
+  78%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.tt-nav-veil {
+  animation: tt-nav-veil-kf 1.7s linear both;
+}
+
+/* Belgi: birinchi kadrdanoq bor va telbalarcha aylanadi — sakkiz aylanish. */
+@keyframes tt-nav-emblem-kf {
+  0% {
+    opacity: 1;
+    transform: rotate(0deg) scale(0.5);
+  }
+  38% {
+    opacity: 1;
+    transform: rotate(2520deg) scale(2.1);
+  }
+  /* Belgi shu yerda tugaydi — nurlar hali boshlanmagan */
+  46%,
+  100% {
+    opacity: 0;
+    transform: rotate(3240deg) scale(2.6);
+  }
+}
+
+.tt-nav-emblem {
+  /* Boshlanishi keskin: birinchi kadrdayoq to'liq tezlik, sekin kirish yo'q */
+  animation: tt-nav-emblem-kf 1.7s cubic-bezier(0.1, 0.55, 0.3, 1) both;
+  will-change: transform, opacity;
+}
+
+@keyframes tt-nav-flash-kf {
+  0%,
+  42% {
+    opacity: 0;
+    transform: scale(0.05);
+  }
+  /* Belgi o'chdi — aynan o'sha joyda kichkina oq dog' yonadi */
+  50% {
+    opacity: 1;
+    transform: scale(0.1);
+  }
+  72% {
+    opacity: 0.95;
+    transform: scale(1.7);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.6);
+  }
+}
+
+.tt-nav-flash {
+  animation: tt-nav-flash-kf 1.7s cubic-bezier(0.2, 0.75, 0.25, 1) both;
+  will-change: transform, opacity;
+}
+
+/* =====================================================================
+   Harakatni kamaytirish talabi — hammasini oʻchiramiz
+   ===================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .tt-sweep::after,
+  .tt-sweep-loop::after { display: none; }
+
+  /* Flesh-karta bir zumda tomonini almashtiradi — aylanish yoʻq.
+     Yuqoridagi `*` qoidasi ham buni qamrab oladi, ammo bu yerda ataylab
+     takrorlanadi: karta funksiyasi saqlanishi shart, faqat animatsiya yoʻqoladi. */
+  .tt-flip-inner { transition: none !important; }
+}

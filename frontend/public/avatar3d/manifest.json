@@ -1,0 +1,691 @@
+{
+ "frame": {
+  "width": 512,
+  "height": 768
+ },
+ "order": {
+  "tug": 0,
+  "base": 1,
+  "BODY": 2,
+  "HEAD": 3,
+  "WEAPON": 4,
+  "SHIELD": 5,
+  "ACCESSORY": 6
+ },
+ "slots": {
+  "doppi": "HEAD",
+  "dubulga": "HEAD",
+  "mis-dubulga": "HEAD",
+  "kumush-dubulga": "HEAD",
+  "oltin-dubulga": "HEAD",
+  "zar-dubulga": "HEAD",
+  "zar-toj": "HEAD",
+  "oddiy-chopon": "BODY",
+  "charm-sovut": "BODY",
+  "temir-sovut": "BODY",
+  "ipak-chopon": "BODY",
+  "zar-sovut": "BODY",
+  "mis-sovut": "BODY",
+  "kumush-sovut": "BODY",
+  "oltin-sovut": "BODY",
+  "yogoch-qilich": "WEAPON",
+  "polat-qilich": "WEAPON",
+  "kamon-sadoq": "WEAPON",
+  "nayza": "WEAPON",
+  "oybolta": "WEAPON",
+  "sohibqiron-qilichi": "WEAPON",
+  "sarkarda-nayzasi": "WEAPON",
+  "ulugbek-kamoni": "WEAPON",
+  "charm-qalqon": "SHIELD",
+  "mis-qalqon": "SHIELD",
+  "kumush-qalqon": "SHIELD",
+  "oltin-qalqon": "SHIELD",
+  "zar-qalqon": "SHIELD",
+  "olov-tumor": "ACCESSORY",
+  "ipak-kamar": "ACCESSORY",
+  "navoiy-devoni": "ACCESSORY",
+  "tug": "ACCESSORY"
+ },
+ "archetypes": {
+  "amirzoda": {
+   "base": "amirzoda/base",
+   "items": {
+    "charm-qalqon": "amirzoda/items/charm-qalqon",
+    "charm-sovut": "amirzoda/items/charm-sovut",
+    "doppi": "amirzoda/items/doppi",
+    "dubulga": "amirzoda/items/dubulga",
+    "ipak-chopon": "amirzoda/items/ipak-chopon",
+    "ipak-kamar": "amirzoda/items/ipak-kamar",
+    "kamon-sadoq": "amirzoda/items/kamon-sadoq",
+    "kumush-dubulga": "amirzoda/items/kumush-dubulga",
+    "kumush-qalqon": "amirzoda/items/kumush-qalqon",
+    "kumush-sovut": "amirzoda/items/kumush-sovut",
+    "mis-dubulga": "amirzoda/items/mis-dubulga",
+    "mis-qalqon": "amirzoda/items/mis-qalqon",
+    "mis-sovut": "amirzoda/items/mis-sovut",
+    "navoiy-devoni": "amirzoda/items/navoiy-devoni",
+    "nayza": "amirzoda/items/nayza",
+    "oddiy-chopon": "amirzoda/items/oddiy-chopon",
+    "olov-tumor": "amirzoda/items/olov-tumor",
+    "oltin-dubulga": "amirzoda/items/oltin-dubulga",
+    "oltin-qalqon": "amirzoda/items/oltin-qalqon",
+    "oltin-sovut": "amirzoda/items/oltin-sovut",
+    "oybolta": "amirzoda/items/oybolta",
+    "polat-qilich": "amirzoda/items/polat-qilich",
+    "sarkarda-nayzasi": "amirzoda/items/sarkarda-nayzasi",
+    "sohibqiron-qilichi": "amirzoda/items/sohibqiron-qilichi",
+    "temir-sovut": "amirzoda/items/temir-sovut",
+    "tug": "amirzoda/items/tug",
+    "ulugbek-kamoni": "amirzoda/items/ulugbek-kamoni",
+    "yogoch-qilich": "amirzoda/items/yogoch-qilich",
+    "zar-dubulga": "amirzoda/items/zar-dubulga",
+    "zar-qalqon": "amirzoda/items/zar-qalqon",
+    "zar-sovut": "amirzoda/items/zar-sovut",
+    "zar-toj": "amirzoda/items/zar-toj"
+   },
+   "anchors": {
+    "head": [
+     0.0,
+     0.0,
+     7.02
+    ],
+    "torso": [
+     0.0,
+     0.0,
+     5.5
+    ],
+    "hand_R": [
+     -0.781,
+     -0.08,
+     3.34
+    ],
+    "forearm_L": [
+     0.781,
+     -0.13,
+     3.89
+    ],
+    "belt": [
+     0.0,
+     -0.487,
+     4.75
+    ]
+   }
+  },
+  "jangchi": {
+   "base": "jangchi/base",
+   "items": {
+    "charm-qalqon": "jangchi/items/charm-qalqon",
+    "charm-sovut": "jangchi/items/charm-sovut",
+    "doppi": "jangchi/items/doppi",
+    "dubulga": "jangchi/items/dubulga",
+    "ipak-chopon": "jangchi/items/ipak-chopon",
+    "ipak-kamar": "jangchi/items/ipak-kamar",
+    "kamon-sadoq": "jangchi/items/kamon-sadoq",
+    "kumush-dubulga": "jangchi/items/kumush-dubulga",
+    "kumush-qalqon": "jangchi/items/kumush-qalqon",
+    "kumush-sovut": "jangchi/items/kumush-sovut",
+    "mis-dubulga": "jangchi/items/mis-dubulga",
+    "mis-qalqon": "jangchi/items/mis-qalqon",
+    "mis-sovut": "jangchi/items/mis-sovut",
+    "navoiy-devoni": "jangchi/items/navoiy-devoni",
+    "nayza": "jangchi/items/nayza",
+    "oddiy-chopon": "jangchi/items/oddiy-chopon",
+    "olov-tumor": "jangchi/items/olov-tumor",
+    "oltin-dubulga": "jangchi/items/oltin-dubulga",
+    "oltin-qalqon": "jangchi/items/oltin-qalqon",
+    "oltin-sovut": "jangchi/items/oltin-sovut",
+    "oybolta": "jangchi/items/oybolta",
+    "polat-qilich": "jangchi/items/polat-qilich",
+    "sarkarda-nayzasi": "jangchi/items/sarkarda-nayzasi",
+    "sohibqiron-qilichi": "jangchi/items/sohibqiron-qilichi",
+    "temir-sovut": "jangchi/items/temir-sovut",
+    "tug": "jangchi/items/tug",
+    "ulugbek-kamoni": "jangchi/items/ulugbek-kamoni",
+    "yogoch-qilich": "jangchi/items/yogoch-qilich",
+    "zar-dubulga": "jangchi/items/zar-dubulga",
+    "zar-qalqon": "jangchi/items/zar-qalqon",
+    "zar-sovut": "jangchi/items/zar-sovut",
+    "zar-toj": "jangchi/items/zar-toj"
+   },
+   "anchors": {
+    "head": [
+     0.0,
+     0.0,
+     7.301
+    ],
+    "torso": [
+     0.0,
+     0.0,
+     5.72
+    ],
+    "hand_R": [
+     -0.928,
+     -0.08,
+     3.485
+    ],
+    "forearm_L": [
+     0.928,
+     -0.13,
+     4.035
+    ],
+    "belt": [
+     0.0,
+     -0.59,
+     4.94
+    ]
+   }
+  },
+  "jangchi-qiz": {
+   "base": "jangchi-qiz/base",
+   "items": {
+    "charm-qalqon": "jangchi-qiz/items/charm-qalqon",
+    "charm-sovut": "jangchi-qiz/items/charm-sovut",
+    "doppi": "jangchi-qiz/items/doppi",
+    "dubulga": "jangchi-qiz/items/dubulga",
+    "ipak-chopon": "jangchi-qiz/items/ipak-chopon",
+    "ipak-kamar": "jangchi-qiz/items/ipak-kamar",
+    "kamon-sadoq": "jangchi-qiz/items/kamon-sadoq",
+    "kumush-dubulga": "jangchi-qiz/items/kumush-dubulga",
+    "kumush-qalqon": "jangchi-qiz/items/kumush-qalqon",
+    "kumush-sovut": "jangchi-qiz/items/kumush-sovut",
+    "mis-dubulga": "jangchi-qiz/items/mis-dubulga",
+    "mis-qalqon": "jangchi-qiz/items/mis-qalqon",
+    "mis-sovut": "jangchi-qiz/items/mis-sovut",
+    "navoiy-devoni": "jangchi-qiz/items/navoiy-devoni",
+    "nayza": "jangchi-qiz/items/nayza",
+    "oddiy-chopon": "jangchi-qiz/items/oddiy-chopon",
+    "olov-tumor": "jangchi-qiz/items/olov-tumor",
+    "oltin-dubulga": "jangchi-qiz/items/oltin-dubulga",
+    "oltin-qalqon": "jangchi-qiz/items/oltin-qalqon",
+    "oltin-sovut": "jangchi-qiz/items/oltin-sovut",
+    "oybolta": "jangchi-qiz/items/oybolta",
+    "polat-qilich": "jangchi-qiz/items/polat-qilich",
+    "sarkarda-nayzasi": "jangchi-qiz/items/sarkarda-nayzasi",
+    "sohibqiron-qilichi": "jangchi-qiz/items/sohibqiron-qilichi",
+    "temir-sovut": "jangchi-qiz/items/temir-sovut",
+    "tug": "jangchi-qiz/items/tug",
+    "ulugbek-kamoni": "jangchi-qiz/items/ulugbek-kamoni",
+    "yogoch-qilich": "jangchi-qiz/items/yogoch-qilich",
+    "zar-dubulga": "jangchi-qiz/items/zar-dubulga",
+    "zar-qalqon": "jangchi-qiz/items/zar-qalqon",
+    "zar-sovut": "jangchi-qiz/items/zar-sovut",
+    "zar-toj": "jangchi-qiz/items/zar-toj"
+   },
+   "anchors": {
+    "head": [
+     0.0,
+     0.0,
+     6.807
+    ],
+    "torso": [
+     0.0,
+     0.0,
+     5.333
+    ],
+    "hand_R": [
+     -0.796,
+     -0.08,
+     3.23
+    ],
+    "forearm_L": [
+     0.796,
+     -0.13,
+     3.78
+    ],
+    "belt": [
+     0.0,
+     -0.514,
+     4.606
+    ]
+   }
+  },
+  "kochmanchi": {
+   "base": "kochmanchi/base",
+   "items": {
+    "charm-qalqon": "kochmanchi/items/charm-qalqon",
+    "charm-sovut": "kochmanchi/items/charm-sovut",
+    "doppi": "kochmanchi/items/doppi",
+    "dubulga": "kochmanchi/items/dubulga",
+    "ipak-chopon": "kochmanchi/items/ipak-chopon",
+    "ipak-kamar": "kochmanchi/items/ipak-kamar",
+    "kamon-sadoq": "kochmanchi/items/kamon-sadoq",
+    "kumush-dubulga": "kochmanchi/items/kumush-dubulga",
+    "kumush-qalqon": "kochmanchi/items/kumush-qalqon",
+    "kumush-sovut": "kochmanchi/items/kumush-sovut",
+    "mis-dubulga": "kochmanchi/items/mis-dubulga",
+    "mis-qalqon": "kochmanchi/items/mis-qalqon",
+    "mis-sovut": "kochmanchi/items/mis-sovut",
+    "navoiy-devoni": "kochmanchi/items/navoiy-devoni",
+    "nayza": "kochmanchi/items/nayza",
+    "oddiy-chopon": "kochmanchi/items/oddiy-chopon",
+    "olov-tumor": "kochmanchi/items/olov-tumor",
+    "oltin-dubulga": "kochmanchi/items/oltin-dubulga",
+    "oltin-qalqon": "kochmanchi/items/oltin-qalqon",
+    "oltin-sovut": "kochmanchi/items/oltin-sovut",
+    "oybolta": "kochmanchi/items/oybolta",
+    "polat-qilich": "kochmanchi/items/polat-qilich",
+    "sarkarda-nayzasi": "kochmanchi/items/sarkarda-nayzasi",
+    "sohibqiron-qilichi": "kochmanchi/items/sohibqiron-qilichi",
+    "temir-sovut": "kochmanchi/items/temir-sovut",
+    "tug": "kochmanchi/items/tug",
+    "ulugbek-kamoni": "kochmanchi/items/ulugbek-kamoni",
+    "yogoch-qilich": "kochmanchi/items/yogoch-qilich",
+    "zar-dubulga": "kochmanchi/items/zar-dubulga",
+    "zar-qalqon": "kochmanchi/items/zar-qalqon",
+    "zar-sovut": "kochmanchi/items/zar-sovut",
+    "zar-toj": "kochmanchi/items/zar-toj"
+   },
+   "anchors": {
+    "head": [
+     0.0,
+     0.0,
+     7.09
+    ],
+    "torso": [
+     0.0,
+     0.0,
+     5.555
+    ],
+    "hand_R": [
+     -0.859,
+     -0.08,
+     3.376
+    ],
+    "forearm_L": [
+     0.859,
+     -0.13,
+     3.926
+    ],
+    "belt": [
+     0.0,
+     -0.539,
+     4.798
+    ]
+   }
+  },
+  "kochmanchi-qiz": {
+   "base": "kochmanchi-qiz/base",
+   "items": {
+    "charm-qalqon": "kochmanchi-qiz/items/charm-qalqon",
+    "charm-sovut": "kochmanchi-qiz/items/charm-sovut",
+    "doppi": "kochmanchi-qiz/items/doppi",
+    "dubulga": "kochmanchi-qiz/items/dubulga",
+    "ipak-chopon": "kochmanchi-qiz/items/ipak-chopon",
+    "ipak-kamar": "kochmanchi-qiz/items/ipak-kamar",
+    "kamon-sadoq": "kochmanchi-qiz/items/kamon-sadoq",
+    "kumush-dubulga": "kochmanchi-qiz/items/kumush-dubulga",
+    "kumush-qalqon": "kochmanchi-qiz/items/kumush-qalqon",
+    "kumush-sovut": "kochmanchi-qiz/items/kumush-sovut",
+    "mis-dubulga": "kochmanchi-qiz/items/mis-dubulga",
+    "mis-qalqon": "kochmanchi-qiz/items/mis-qalqon",
+    "mis-sovut": "kochmanchi-qiz/items/mis-sovut",
+    "navoiy-devoni": "kochmanchi-qiz/items/navoiy-devoni",
+    "nayza": "kochmanchi-qiz/items/nayza",
+    "oddiy-chopon": "kochmanchi-qiz/items/oddiy-chopon",
+    "olov-tumor": "kochmanchi-qiz/items/olov-tumor",
+    "oltin-dubulga": "kochmanchi-qiz/items/oltin-dubulga",
+    "oltin-qalqon": "kochmanchi-qiz/items/oltin-qalqon",
+    "oltin-sovut": "kochmanchi-qiz/items/oltin-sovut",
+    "oybolta": "kochmanchi-qiz/items/oybolta",
+    "polat-qilich": "kochmanchi-qiz/items/polat-qilich",
+    "sarkarda-nayzasi": "kochmanchi-qiz/items/sarkarda-nayzasi",
+    "sohibqiron-qilichi": "kochmanchi-qiz/items/sohibqiron-qilichi",
+    "temir-sovut": "kochmanchi-qiz/items/temir-sovut",
+    "tug": "kochmanchi-qiz/items/tug",
+    "ulugbek-kamoni": "kochmanchi-qiz/items/ulugbek-kamoni",
+    "yogoch-qilich": "kochmanchi-qiz/items/yogoch-qilich",
+    "zar-dubulga": "kochmanchi-qiz/items/zar-dubulga",
+    "zar-qalqon": "kochmanchi-qiz/items/zar-qalqon",
+    "zar-sovut": "kochmanchi-qiz/items/zar-sovut",
+    "zar-toj": "kochmanchi-qiz/items/zar-toj"
+   },
+   "anchors": {
+    "head": [
+     0.0,
+     0.0,
+     6.807
+    ],
+    "torso": [
+     0.0,
+     0.0,
+     5.333
+    ],
+    "hand_R": [
+     -0.796,
+     -0.08,
+     3.23
+    ],
+    "forearm_L": [
+     0.796,
+     -0.13,
+     3.78
+    ],
+    "belt": [
+     0.0,
+     -0.514,
+     4.606
+    ]
+   }
+  },
+  "malika": {
+   "base": "malika/base",
+   "items": {
+    "charm-qalqon": "malika/items/charm-qalqon",
+    "charm-sovut": "malika/items/charm-sovut",
+    "doppi": "malika/items/doppi",
+    "dubulga": "malika/items/dubulga",
+    "ipak-chopon": "malika/items/ipak-chopon",
+    "ipak-kamar": "malika/items/ipak-kamar",
+    "kamon-sadoq": "malika/items/kamon-sadoq",
+    "kumush-dubulga": "malika/items/kumush-dubulga",
+    "kumush-qalqon": "malika/items/kumush-qalqon",
+    "kumush-sovut": "malika/items/kumush-sovut",
+    "mis-dubulga": "malika/items/mis-dubulga",
+    "mis-qalqon": "malika/items/mis-qalqon",
+    "mis-sovut": "malika/items/mis-sovut",
+    "navoiy-devoni": "malika/items/navoiy-devoni",
+    "nayza": "malika/items/nayza",
+    "oddiy-chopon": "malika/items/oddiy-chopon",
+    "olov-tumor": "malika/items/olov-tumor",
+    "oltin-dubulga": "malika/items/oltin-dubulga",
+    "oltin-qalqon": "malika/items/oltin-qalqon",
+    "oltin-sovut": "malika/items/oltin-sovut",
+    "oybolta": "malika/items/oybolta",
+    "polat-qilich": "malika/items/polat-qilich",
+    "sarkarda-nayzasi": "malika/items/sarkarda-nayzasi",
+    "sohibqiron-qilichi": "malika/items/sohibqiron-qilichi",
+    "temir-sovut": "malika/items/temir-sovut",
+    "tug": "malika/items/tug",
+    "ulugbek-kamoni": "malika/items/ulugbek-kamoni",
+    "yogoch-qilich": "malika/items/yogoch-qilich",
+    "zar-dubulga": "malika/items/zar-dubulga",
+    "zar-qalqon": "malika/items/zar-qalqon",
+    "zar-sovut": "malika/items/zar-sovut",
+    "zar-toj": "malika/items/zar-toj"
+   },
+   "anchors": {
+    "head": [
+     0.0,
+     0.0,
+     6.739
+    ],
+    "torso": [
+     0.0,
+     0.0,
+     5.28
+    ],
+    "hand_R": [
+     -0.726,
+     -0.08,
+     3.195
+    ],
+    "forearm_L": [
+     0.726,
+     -0.13,
+     3.745
+    ],
+    "belt": [
+     0.0,
+     -0.465,
+     4.56
+    ]
+   }
+  },
+  "oddiy-qiz": {
+   "base": "oddiy-qiz/base",
+   "items": {
+    "charm-qalqon": "oddiy-qiz/items/charm-qalqon",
+    "charm-sovut": "oddiy-qiz/items/charm-sovut",
+    "doppi": "oddiy-qiz/items/doppi",
+    "dubulga": "oddiy-qiz/items/dubulga",
+    "ipak-chopon": "oddiy-qiz/items/ipak-chopon",
+    "ipak-kamar": "oddiy-qiz/items/ipak-kamar",
+    "kamon-sadoq": "oddiy-qiz/items/kamon-sadoq",
+    "kumush-dubulga": "oddiy-qiz/items/kumush-dubulga",
+    "kumush-qalqon": "oddiy-qiz/items/kumush-qalqon",
+    "kumush-sovut": "oddiy-qiz/items/kumush-sovut",
+    "mis-dubulga": "oddiy-qiz/items/mis-dubulga",
+    "mis-qalqon": "oddiy-qiz/items/mis-qalqon",
+    "mis-sovut": "oddiy-qiz/items/mis-sovut",
+    "navoiy-devoni": "oddiy-qiz/items/navoiy-devoni",
+    "nayza": "oddiy-qiz/items/nayza",
+    "oddiy-chopon": "oddiy-qiz/items/oddiy-chopon",
+    "olov-tumor": "oddiy-qiz/items/olov-tumor",
+    "oltin-dubulga": "oddiy-qiz/items/oltin-dubulga",
+    "oltin-qalqon": "oddiy-qiz/items/oltin-qalqon",
+    "oltin-sovut": "oddiy-qiz/items/oltin-sovut",
+    "oybolta": "oddiy-qiz/items/oybolta",
+    "polat-qilich": "oddiy-qiz/items/polat-qilich",
+    "sarkarda-nayzasi": "oddiy-qiz/items/sarkarda-nayzasi",
+    "sohibqiron-qilichi": "oddiy-qiz/items/sohibqiron-qilichi",
+    "temir-sovut": "oddiy-qiz/items/temir-sovut",
+    "tug": "oddiy-qiz/items/tug",
+    "ulugbek-kamoni": "oddiy-qiz/items/ulugbek-kamoni",
+    "yogoch-qilich": "oddiy-qiz/items/yogoch-qilich",
+    "zar-dubulga": "oddiy-qiz/items/zar-dubulga",
+    "zar-qalqon": "oddiy-qiz/items/zar-qalqon",
+    "zar-sovut": "oddiy-qiz/items/zar-sovut",
+    "zar-toj": "oddiy-qiz/items/zar-toj"
+   },
+   "anchors": {
+    "head": [
+     0.0,
+     0.0,
+     6.739
+    ],
+    "torso": [
+     0.0,
+     0.0,
+     5.28
+    ],
+    "hand_R": [
+     -0.761,
+     -0.08,
+     3.195
+    ],
+    "forearm_L": [
+     0.761,
+     -0.13,
+     3.745
+    ],
+    "belt": [
+     0.0,
+     -0.496,
+     4.56
+    ]
+   }
+  },
+  "oddiy-yigit": {
+   "base": "oddiy-yigit/base",
+   "items": {
+    "charm-qalqon": "oddiy-yigit/items/charm-qalqon",
+    "charm-sovut": "oddiy-yigit/items/charm-sovut",
+    "doppi": "oddiy-yigit/items/doppi",
+    "dubulga": "oddiy-yigit/items/dubulga",
+    "ipak-chopon": "oddiy-yigit/items/ipak-chopon",
+    "ipak-kamar": "oddiy-yigit/items/ipak-kamar",
+    "kamon-sadoq": "oddiy-yigit/items/kamon-sadoq",
+    "kumush-dubulga": "oddiy-yigit/items/kumush-dubulga",
+    "kumush-qalqon": "oddiy-yigit/items/kumush-qalqon",
+    "kumush-sovut": "oddiy-yigit/items/kumush-sovut",
+    "mis-dubulga": "oddiy-yigit/items/mis-dubulga",
+    "mis-qalqon": "oddiy-yigit/items/mis-qalqon",
+    "mis-sovut": "oddiy-yigit/items/mis-sovut",
+    "navoiy-devoni": "oddiy-yigit/items/navoiy-devoni",
+    "nayza": "oddiy-yigit/items/nayza",
+    "oddiy-chopon": "oddiy-yigit/items/oddiy-chopon",
+    "olov-tumor": "oddiy-yigit/items/olov-tumor",
+    "oltin-dubulga": "oddiy-yigit/items/oltin-dubulga",
+    "oltin-qalqon": "oddiy-yigit/items/oltin-qalqon",
+    "oltin-sovut": "oddiy-yigit/items/oltin-sovut",
+    "oybolta": "oddiy-yigit/items/oybolta",
+    "polat-qilich": "oddiy-yigit/items/polat-qilich",
+    "sarkarda-nayzasi": "oddiy-yigit/items/sarkarda-nayzasi",
+    "sohibqiron-qilichi": "oddiy-yigit/items/sohibqiron-qilichi",
+    "temir-sovut": "oddiy-yigit/items/temir-sovut",
+    "tug": "oddiy-yigit/items/tug",
+    "ulugbek-kamoni": "oddiy-yigit/items/ulugbek-kamoni",
+    "yogoch-qilich": "oddiy-yigit/items/yogoch-qilich",
+    "zar-dubulga": "oddiy-yigit/items/zar-dubulga",
+    "zar-qalqon": "oddiy-yigit/items/zar-qalqon",
+    "zar-sovut": "oddiy-yigit/items/zar-sovut",
+    "zar-toj": "oddiy-yigit/items/zar-toj"
+   },
+   "anchors": {
+    "head": [
+     0.0,
+     0.0,
+     7.02
+    ],
+    "torso": [
+     0.0,
+     0.0,
+     5.5
+    ],
+    "hand_R": [
+     -0.82,
+     -0.08,
+     3.34
+    ],
+    "forearm_L": [
+     0.82,
+     -0.13,
+     3.89
+    ],
+    "belt": [
+     0.0,
+     -0.52,
+     4.75
+    ]
+   }
+  },
+  "olima": {
+   "base": "olima/base",
+   "items": {
+    "charm-qalqon": "olima/items/charm-qalqon",
+    "charm-sovut": "olima/items/charm-sovut",
+    "doppi": "olima/items/doppi",
+    "dubulga": "olima/items/dubulga",
+    "ipak-chopon": "olima/items/ipak-chopon",
+    "ipak-kamar": "olima/items/ipak-kamar",
+    "kamon-sadoq": "olima/items/kamon-sadoq",
+    "kumush-dubulga": "olima/items/kumush-dubulga",
+    "kumush-qalqon": "olima/items/kumush-qalqon",
+    "kumush-sovut": "olima/items/kumush-sovut",
+    "mis-dubulga": "olima/items/mis-dubulga",
+    "mis-qalqon": "olima/items/mis-qalqon",
+    "mis-sovut": "olima/items/mis-sovut",
+    "navoiy-devoni": "olima/items/navoiy-devoni",
+    "nayza": "olima/items/nayza",
+    "oddiy-chopon": "olima/items/oddiy-chopon",
+    "olov-tumor": "olima/items/olov-tumor",
+    "oltin-dubulga": "olima/items/oltin-dubulga",
+    "oltin-qalqon": "olima/items/oltin-qalqon",
+    "oltin-sovut": "olima/items/oltin-sovut",
+    "oybolta": "olima/items/oybolta",
+    "polat-qilich": "olima/items/polat-qilich",
+    "sarkarda-nayzasi": "olima/items/sarkarda-nayzasi",
+    "sohibqiron-qilichi": "olima/items/sohibqiron-qilichi",
+    "temir-sovut": "olima/items/temir-sovut",
+    "tug": "olima/items/tug",
+    "ulugbek-kamoni": "olima/items/ulugbek-kamoni",
+    "yogoch-qilich": "olima/items/yogoch-qilich",
+    "zar-dubulga": "olima/items/zar-dubulga",
+    "zar-qalqon": "olima/items/zar-qalqon",
+    "zar-sovut": "olima/items/zar-sovut",
+    "zar-toj": "olima/items/zar-toj"
+   },
+   "anchors": {
+    "head": [
+     0.0,
+     0.0,
+     6.739
+    ],
+    "torso": [
+     0.0,
+     0.0,
+     5.28
+    ],
+    "hand_R": [
+     -0.726,
+     -0.08,
+     3.195
+    ],
+    "forearm_L": [
+     0.726,
+     -0.13,
+     3.745
+    ],
+    "belt": [
+     0.0,
+     -0.465,
+     4.56
+    ]
+   }
+  },
+  "sarkarda": {
+   "base": "sarkarda/base",
+   "items": {
+    "charm-qalqon": "sarkarda/items/charm-qalqon",
+    "charm-sovut": "sarkarda/items/charm-sovut",
+    "doppi": "sarkarda/items/doppi",
+    "dubulga": "sarkarda/items/dubulga",
+    "ipak-chopon": "sarkarda/items/ipak-chopon",
+    "ipak-kamar": "sarkarda/items/ipak-kamar",
+    "kamon-sadoq": "sarkarda/items/kamon-sadoq",
+    "kumush-dubulga": "sarkarda/items/kumush-dubulga",
+    "kumush-qalqon": "sarkarda/items/kumush-qalqon",
+    "kumush-sovut": "sarkarda/items/kumush-sovut",
+    "mis-dubulga": "sarkarda/items/mis-dubulga",
+    "mis-qalqon": "sarkarda/items/mis-qalqon",
+    "mis-sovut": "sarkarda/items/mis-sovut",
+    "navoiy-devoni": "sarkarda/items/navoiy-devoni",
+    "nayza": "sarkarda/items/nayza",
+    "oddiy-chopon": "sarkarda/items/oddiy-chopon",
+    "olov-tumor": "sarkarda/items/olov-tumor",
+    "oltin-dubulga": "sarkarda/items/oltin-dubulga",
+    "oltin-qalqon": "sarkarda/items/oltin-qalqon",
+    "oltin-sovut": "sarkarda/items/oltin-sovut",
+    "oybolta": "sarkarda/items/oybolta",
+    "polat-qilich": "sarkarda/items/polat-qilich",
+    "sarkarda-nayzasi": "sarkarda/items/sarkarda-nayzasi",
+    "sohibqiron-qilichi": "sarkarda/items/sohibqiron-qilichi",
+    "temir-sovut": "sarkarda/items/temir-sovut",
+    "tug": "sarkarda/items/tug",
+    "ulugbek-kamoni": "sarkarda/items/ulugbek-kamoni",
+    "yogoch-qilich": "sarkarda/items/yogoch-qilich",
+    "zar-dubulga": "sarkarda/items/zar-dubulga",
+    "zar-qalqon": "sarkarda/items/zar-qalqon",
+    "zar-sovut": "sarkarda/items/zar-sovut",
+    "zar-toj": "sarkarda/items/zar-toj"
+   },
+   "anchors": {
+    "head": [
+     0.0,
+     0.0,
+     7.301
+    ],
+    "torso": [
+     0.0,
+     0.0,
+     5.72
+    ],
+    "hand_R": [
+     -0.928,
+     -0.08,
+     3.485
+    ],
+    "forearm_L": [
+     0.928,
+     -0.13,
+     4.035
+    ],
+    "belt": [
+     0.0,
+     -0.59,
+     4.94
+    ]
+   }
+  }
+ }
+}

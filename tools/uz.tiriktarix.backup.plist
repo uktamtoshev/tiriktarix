@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Har kuni soat 20:00 da bazaning zaxira nusxasini oladi.
+
+  O'RNATISH:
+    cp tools/uz.tiriktarix.backup.plist ~/Library/LaunchAgents/
+    launchctl load ~/Library/LaunchAgents/uz.tiriktarix.backup.plist
+
+  O'CHIRISH:
+    launchctl unload ~/Library/LaunchAgents/uz.tiriktarix.backup.plist
+
+  RunAtLoad yo'q — yuklanganda darhol ishga tushishi shart emas.
+  Noutbuk 20:00 da uxlab yotgan bo'lsa, launchd uyg'onganda ishga tushiradi.
+-->
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>uz.tiriktarix.backup</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Users/macbookair2020/Desktop/PROJECTS/TIRIK TARIX/tools/backup-db.sh</string>
+	</array>
+	<key>StartCalendarInterval</key>
+	<dict>
+		<key>Hour</key>
+		<integer>20</integer>
+		<key>Minute</key>
+		<integer>0</integer>
+	</dict>
+	<key>StandardOutPath</key>
+	<string>/Users/macbookair2020/Desktop/PROJECTS/TIRIK TARIX/backups/backup.log</string>
+	<key>StandardErrorPath</key>
+	<string>/Users/macbookair2020/Desktop/PROJECTS/TIRIK TARIX/backups/backup.log</string>
+</dict>
+</plist>
