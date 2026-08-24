@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import uz.tiriktarix.avatar.AvatarService;
 import uz.tiriktarix.profile.ProfileService;
 import uz.tiriktarix.quiz.QuizService;
 import uz.tiriktarix.quiz.QuizService.QuestionDto;
@@ -33,6 +34,12 @@ import uz.tiriktarix.quiz.QuizService.QuestionDto;
  * REYTING. O'yin tugagach Elo formulasi bo'yicha hisoblanadi va profilga
  * yoziladi. Kuchli raqibni yengish ko'p ball beradi, kuchsizni yengish — kam.
  *
+ * USTUNLIK (daraja + jihoz). Bu — savolga bo'lgan bilim tekshiruvi emas,
+ * o'yinchining umumiy yutuqlari uchun mukofot: yuqori daraja (XP) va kiyilgan
+ * NODIR jihozlar sohibi bitta boshlang'ich ball bilan boshlaydi hamda teng
+ * hisobda (durang o'rniga) g'olib chiqadi. Bu HAR DOIM oz — bilim bilan
+ * to'plangan hisobni yengib bo'lmaydi, faqat tengmani hal qiladi.
+ *
  * NEGA XOTIRADA, BAZADA EMAS. Bellashuv umri — bir daqiqa. Bu kontent emas,
  * o'tkinchi holat. Faqat NATIJA (reyting) bazaga tushadi.
  *
@@ -47,6 +54,9 @@ public class DuelService {
 
     /** Elo K-koeffitsiyenti: bitta o'yinda reyting qanchaga siljishi mumkin. */
     private static final int ELO_K = 24;
+
+    /** Kuchli tomonga (yuqori daraja + nodir jihoz) beriladigan boshlang'ich ball. */
+    private static final int ADVANTAGE_BONUS = 1;
 
     /** Tashlab ketilgan xonalar shuncha vaqtdan keyin o'chiriladi. */
     private static final Duration LIFETIME = Duration.ofMinutes(30);
@@ -71,8 +81,14 @@ public class DuelService {
 
     // ============================== Tashqi DTO'lar ==============================
 
-    /** Raqib haqida tashqariga chiqadigan YAGONA ma'lumot. Savoli bu yerda yo'q. */
-    public record SideDto(String nickname, String scope, int score, int rating) {
+    /**
+     * Raqib haqida tashqariga chiqadigan YAGONA ma'lumot. Savoli bu yerda yo'q.
+     *
+     * @param rankLevel     XP dan hisoblangan daraja — ustunlik shundan keladi.
+     * @param rareEquipped  kiyilgan NODIR (RARE) jihozlar soni.
+     */
+    public record SideDto(String nickname, String scope, int score, int rating,
+                          int rankLevel, int rareEquipped) {
     }
 
     /** `question` — DOIM so'rovchining o'z savoli; `ratingDelta` — o'yin oxirida. */
@@ -94,17 +110,23 @@ public class DuelService {
         private final String nickname;
         private final String scope;
         private final int ratingAtStart;
+        /** XP dan hisoblangan daraja va kiyilgan nodir jihozlar — ustunlik shulardan. */
+        private final int rankLevel;
+        private final int rareEquipped;
         /** O'yinchining SHAXSIY savollari — tashqariga to'liq chiqmaydi. */
         private final List<QuestionDto> pool;
         private int cursor;
         private int score;
         private Integer ratingDelta;
 
-        private Side(String clientId, String nickname, String scope, int rating, List<QuestionDto> pool) {
+        private Side(String clientId, String nickname, String scope, int rating,
+                     int rankLevel, int rareEquipped, List<QuestionDto> pool) {
             this.clientId = clientId;
             this.nickname = nickname;
             this.scope = scope;
             this.ratingAtStart = rating;
+            this.rankLevel = rankLevel;
+            this.rareEquipped = rareEquipped;
             this.pool = pool;
         }
 
@@ -113,8 +135,13 @@ public class DuelService {
             return pool.get(cursor % pool.size());
         }
 
+        /** Daraja + nodir jihozlar yig'indisi — kim kuchliroqligini shu bilan solishtiramiz. */
+        private int power() {
+            return rankLevel + rareEquipped;
+        }
+
         private SideDto toDto() {
-            return new SideDto(nickname, scope, score, ratingAtStart);
+            return new SideDto(nickname, scope, score, ratingAtStart, rankLevel, rareEquipped);
         }
     }
 
@@ -209,10 +236,20 @@ public class DuelService {
     private final SecureRandom random = new SecureRandom();
     private final QuizService quizService;
     private final ProfileService profileService;
+    private final AvatarService avatarService;
 
-    public DuelService(QuizService quizService, ProfileService profileService) {
+    public DuelService(QuizService quizService, ProfileService profileService, AvatarService avatarService) {
         this.quizService = quizService;
         this.profileService = profileService;
+        this.avatarService = avatarService;
+    }
+
+    /** Ustunlik uchun: shu o'yinchining hozirgi daraja va kiyilgan nodir jihozlar soni. */
+    private record Power(int rankLevel, int rareEquipped) {
+    }
+
+    private Power powerOf(String clientId) {
+        return new Power(profileService.rankLevel(clientId), avatarService.rareEquippedCount(clientId));
     }
 
     // ============================== Navbat (reyting) ==============================
@@ -315,12 +352,31 @@ public class DuelService {
     }
 
     private Duel pair(Waiting a, Waiting b) {
-        Side host = new Side(a.clientId, a.nickname, a.scope, a.rating, quizService.duelPool(a.scope));
-        Side guest = new Side(b.clientId, b.nickname, b.scope, b.rating, quizService.duelPool(b.scope));
+        Power powerA = powerOf(a.clientId);
+        Power powerB = powerOf(b.clientId);
+        Side host = new Side(a.clientId, a.nickname, a.scope, a.rating,
+                powerA.rankLevel(), powerA.rareEquipped(), quizService.duelPool(a.scope));
+        Side guest = new Side(b.clientId, b.nickname, b.scope, b.rating,
+                powerB.rankLevel(), powerB.rareEquipped(), quizService.duelPool(b.scope));
+        applyAdvantage(host, guest);
         Duel duel = new Duel(nextFreeCode(), host, true);
         duel.guest = guest;
         rooms.put(duel.code, duel);
         return duel;
+    }
+
+    /**
+     * Kuchli tomonga (yuqori daraja + nodir jihoz) boshlang'ich ball beriladi.
+     * Faqat ikkalasi ham ma'lum bo'lganda chaqiriladi — teng kuchda hech kimga
+     * bonus berilmaydi.
+     */
+    private static void applyAdvantage(Side host, Side guest) {
+        int gap = host.power() - guest.power();
+        if (gap > 0) {
+            host.score += ADVANTAGE_BONUS;
+        } else if (gap < 0) {
+            guest.score += ADVANTAGE_BONUS;
+        }
     }
 
     private void sweepQueue() {
@@ -333,8 +389,10 @@ public class DuelService {
     /** Xona ochish. Qaytgan kodni o'yinchi raqibiga aytadi. */
     public DuelStateDto create(String clientId, String nickname, String scope) {
         sweepExpired();
+        Power power = powerOf(clientId);
         Side host = new Side(clientId, cleanNickname(nickname, "Chaqiruvchi"), scope,
-                profileService.duelRating(clientId), quizService.duelPool(scope));
+                profileService.duelRating(clientId), power.rankLevel(), power.rareEquipped(),
+                quizService.duelPool(scope));
         Duel duel = new Duel(nextFreeCode(), host, false);
         rooms.put(duel.code, duel);
         return state(duel, host);
@@ -355,8 +413,11 @@ public class DuelService {
             if (duel.startedAt != null) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Bellashuv allaqachon boshlangan");
             }
+            Power power = powerOf(clientId);
             duel.guest = new Side(clientId, cleanNickname(nickname, "Raqib"), scope,
-                    profileService.duelRating(clientId), quizService.duelPool(scope));
+                    profileService.duelRating(clientId), power.rankLevel(), power.rareEquipped(),
+                    quizService.duelPool(scope));
+            applyAdvantage(duel.host, duel.guest);
             return state(duel, duel.guest);
         }
     }
@@ -463,7 +524,7 @@ public class DuelService {
         duel.rated = true;
         Side a = duel.host;
         Side b = duel.guest;
-        double actualA = a.score > b.score ? 1 : (a.score < b.score ? 0 : 0.5);
+        double actualA = result(a, b);
         int deltaA = eloDelta(a.ratingAtStart, b.ratingAtStart, actualA);
         int deltaB = eloDelta(b.ratingAtStart, a.ratingAtStart, 1 - actualA);
         a.ratingDelta = deltaA;
@@ -491,10 +552,29 @@ public class DuelService {
         if (phase != Phase.FINISHED || other == null) {
             return null;
         }
-        if (side.score > other.score) {
+        double actual = result(side, other);
+        if (actual == 1) {
             return "WIN";
         }
-        return side.score < other.score ? "LOSS" : "DRAW";
+        return actual == 0 ? "LOSS" : "DRAW";
+    }
+
+    /**
+     * 1 — {@code side} g'olib, 0 — mag'lub, 0.5 — durang.
+     *
+     * TENG HISOBDA USTUNLIK HAL QILADI. Bilim bilan to'plangan hisobni hech
+     * narsa yenga olmaydi (skor teng bo'lmasa — shu yerda tugaydi); faqat aniq
+     * durang holatida yuqori daraja + nodir jihoz sohibi g'olib deb topiladi.
+     */
+    private static double result(Side side, Side other) {
+        if (side.score != other.score) {
+            return side.score > other.score ? 1 : 0;
+        }
+        int gap = side.power() - other.power();
+        if (gap == 0) {
+            return 0.5;
+        }
+        return gap > 0 ? 1 : 0;
     }
 
     private Duel require(String code) {

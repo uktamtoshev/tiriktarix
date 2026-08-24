@@ -29,6 +29,15 @@ public class ProfileService {
     }
 
     /**
+     * Bellashuvda ustunlik uchun: XP dan hisoblangan hozirgi daraja.
+     * Reyting ({@link #duelRating}) bilan aralashtirmang — bu boshqa shkala.
+     */
+    @Transactional
+    public int rankLevel(String clientId) {
+        return Levels.of(getOrCreate(clientId).getXp()).level();
+    }
+
+    /**
      * Bellashuv natijasini yozadi.
      *
      * @param outcome 1 — g'alaba, 0 — mag'lubiyat, -1 — durang

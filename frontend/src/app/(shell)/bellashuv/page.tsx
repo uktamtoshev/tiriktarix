@@ -68,6 +68,8 @@ const TXT = {
     draw: "Ничья",
     rating: "Рейтинг",
     playAgain: "Ещё одно состязание",
+    levelShort: "Ур.",
+    advantage: "Преимущество: более высокий ранг и редкая экипировка",
   },
   uz: {
     error: "Xatolik yuz berdi",
@@ -124,6 +126,8 @@ const TXT = {
     draw: "Durang",
     rating: "Reyting",
     playAgain: "Yana bellashuv",
+    levelShort: "Dar.",
+    advantage: "Ustunlik: yuqori daraja va nodir jihoz",
   },
   uk: {
     error: "Сталася помилка",
@@ -180,6 +184,8 @@ const TXT = {
     draw: "Нічия",
     rating: "Рейтинг",
     playAgain: "Ще одна дуель",
+    levelShort: "Рів.",
+    advantage: "Перевага: вищий ранг і рідкісна екіпіровка",
   },
 };
 
@@ -581,6 +587,15 @@ export default function DuelPage() {
             name={duel.me.nickname}
             rating={duel.me.rating}
             topic={labelOf(duel.me.scope)}
+            rankLevel={duel.me.rankLevel}
+            rareEquipped={duel.me.rareEquipped}
+            advantage={
+              duel.opponent != null &&
+              duel.me.rankLevel + duel.me.rareEquipped >
+                duel.opponent.rankLevel + duel.opponent.rareEquipped
+            }
+            advantageLabel={t.advantage}
+            levelLabel={t.levelShort}
             mine
           />
           <div className="shrink-0 text-center">
@@ -595,6 +610,15 @@ export default function DuelPage() {
             name={duel.opponent?.nickname ?? t.waitingOpponent}
             rating={duel.opponent?.rating ?? null}
             topic={duel.opponent ? labelOf(duel.opponent.scope) : "—"}
+            rankLevel={duel.opponent?.rankLevel ?? null}
+            rareEquipped={duel.opponent?.rareEquipped ?? 0}
+            advantage={
+              duel.opponent != null &&
+              duel.opponent.rankLevel + duel.opponent.rareEquipped >
+                duel.me.rankLevel + duel.me.rareEquipped
+            }
+            advantageLabel={t.advantage}
+            levelLabel={t.levelShort}
           />
         </div>
         {duel.phase === "RUNNING" && (
@@ -712,32 +736,58 @@ export default function DuelPage() {
   );
 }
 
-/** Tablodagi bir tomon. Raqib tomonida ham faqat ism, reyting, mavzu va ball. */
+/**
+ * Tablodagi bir tomon. Ism, reyting, mavzu va ball bilan bir qatorda daraja
+ * va nodir jihozlar soni ham ko'rinadi — ustunlik shulardan kelib chiqadi,
+ * shuning uchun bola nega ustun ekanini ko'rishi kerak (⚔ belgisi).
+ */
 function Sideboard({
   name,
   rating,
   topic,
+  rankLevel,
+  rareEquipped = 0,
+  advantage = false,
+  advantageLabel,
+  levelLabel,
   mine = false,
 }: {
   name: string;
   rating: number | null;
   topic: string;
+  rankLevel: number | null;
+  rareEquipped?: number;
+  advantage?: boolean;
+  advantageLabel: string;
+  levelLabel: string;
   mine?: boolean;
 }) {
+  const badge = advantage && (
+    <span title={advantageLabel} aria-label={advantageLabel}>
+      ⚔️
+    </span>
+  );
   return (
     <div className={`min-w-0 flex-1 ${mine ? "text-left" : "text-right"}`}>
       <p
-        className={`truncate font-display text-[11px] font-semibold uppercase tracking-[0.22em] ${
-          mine ? "text-zar" : "text-feruza-bright"
+        className={`flex items-center gap-1.5 truncate font-display text-[11px] font-semibold uppercase tracking-[0.22em] ${
+          mine ? "text-zar" : "flex-row-reverse justify-end text-feruza-bright"
         }`}
       >
-        {name}
+        {badge}
+        <span className="truncate">{name}</span>
       </p>
       <p className="mt-1 truncate text-xs text-dust">
         {rating !== null && <span className="text-marble">{rating}</span>}
         {rating !== null && " · "}
         {topic}
       </p>
+      {rankLevel !== null && (
+        <p className="mt-0.5 truncate text-[11px] text-dust/70">
+          {levelLabel} {rankLevel}
+          {rareEquipped > 0 ? ` · 💎×${rareEquipped}` : ""}
+        </p>
+      )}
     </div>
   );
 }

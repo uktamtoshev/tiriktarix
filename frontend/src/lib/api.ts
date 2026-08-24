@@ -116,6 +116,10 @@ export type DuelSide = {
   score: number;
   /** O'yin boshlanishidagi reyting. */
   rating: number;
+  /** XP dan hisoblangan daraja — bellashuvda ustunlik beradi (teng hisobda g'alaba). */
+  rankLevel: number;
+  /** Kiyilgan NODIR (RARE) jihozlar soni — ustunlikka qo'shiladi. */
+  rareEquipped: number;
 };
 
 /** `question` — DOIM so'rovchining o'z savoli (raqibniki emas). */

@@ -190,6 +190,30 @@ public class AvatarService {
     }
 
     /**
+     * Bellashuvda ustunlik uchun: o'yinchi kiyib turgan NODIR (RARE) jihozlar
+     * soni. Profil hali yo'q bo'lsa — jihoz ham yo'q, natija 0.
+     */
+    @Transactional(readOnly = true)
+    public int rareEquippedCount(String clientId) {
+        return profileRepository.findByClientId(clientId)
+                .map(this::rareEquippedCount)
+                .orElse(0);
+    }
+
+    private int rareEquippedCount(LearnerProfile profile) {
+        Map<Long, AvatarItem> byId = new LinkedHashMap<>();
+        itemRepository.findAllByOrderByOrdinalAsc().forEach(i -> byId.put(i.getId(), i));
+        int count = 0;
+        for (AvatarEquipment e : equipmentRepository.findByProfileId(profile.getId())) {
+            AvatarItem item = byId.get(e.getItemId());
+            if (item != null && AvatarItem.Rarity.RARE.name().equals(item.getRarity())) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
      * Aynan shu sinov tufayli ochilgan jihozlar (natijalar sahifasidagi bayram
      * uchun). Ikkala surat solishtiriladi, shuning uchun XP dan tashqari kvest
      * shartlari ham ushlanadi: «Mis sovut ochildi» — 8 ball to'plangani uchun.
