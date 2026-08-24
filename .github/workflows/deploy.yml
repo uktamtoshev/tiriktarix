@@ -73,6 +73,9 @@ jobs:
       - backend
       - frontend
 
+    env:
+     SERVER_HOST: ${{ secrets.SERVER_HOST }}
+
     runs-on: ubuntu-latest
 
     steps:
@@ -97,7 +100,7 @@ jobs:
             -i ~/.ssh/id_rsa \
             -o StrictHostKeyChecking=no \
             -p ${SSH_PORT} \
-            ${SSH_USER}@${secrets.SERVER_HOST} "
+            ${SSH_USER}@${SERVER_HOST} "
 
               docker pull ${BACKEND_IMAGE}:latest
               docker pull ${FRONTEND_IMAGE}:latest
