@@ -13,7 +13,7 @@ import Button, { ButtonLink } from "@/components/ui/Button";
 import { Divider, Star } from "@/components/ui/Ornament";
 import { formatYear } from "@/lib/eras";
 import { useLang, useT } from "@/lib/lang";
-import { countryQuery, useCountry } from "@/lib/country";
+import { countryQuery, COUNTRY_NAME, useCountry } from "@/lib/country";
 import { eraDescription, eraName } from "@/lib/content.ru";
 
 /**
@@ -74,7 +74,6 @@ const TXT = {
       },
     } as Record<string, { title: string; text: string }>,
     statLabels: ["Карточек фактов", "Исторических эпох", "Событий", "Вопросов в тестах"],
-    overline: "История Узбекистана",
     h1a: "Не читай",
     h1b: "про героев —",
     h1gold: "«поговори» с ними",
@@ -127,7 +126,6 @@ const TXT = {
       },
     } as Record<string, { title: string; text: string }>,
     statLabels: ["Fakt kartochkasi", "Tarixiy davr", "Voqea", "Sinov savoli"],
-    overline: "O'zbekiston tarixi",
     h1a: "Qahramonlar haqida",
     h1b: "o'qima —",
     h1gold: "ular bilan «gaplash»",
@@ -180,7 +178,6 @@ const TXT = {
       },
     } as Record<string, { title: string; text: string }>,
     statLabels: ["Карток фактів", "Історичних епох", "Подій", "Питань у тестах"],
-    overline: "Історія Узбекистану",
     h1a: "Не читай",
     h1b: "про героїв —",
     h1gold: "«поговори» з ними",
@@ -261,7 +258,7 @@ export default function Home() {
             className="flex items-center justify-center gap-3 text-[10px] font-semibold uppercase tracking-[0.42em] text-zar/85 sm:text-[11px]"
           >
             <Star className="h-3 w-3" />
-            {t.overline}
+            {COUNTRY_NAME[country][lang]}
             <Star className="h-3 w-3" />
           </motion.p>
 
