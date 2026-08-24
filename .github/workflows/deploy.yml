@@ -75,6 +75,7 @@ jobs:
 
     env:
      SERVER_HOST: ${{ secrets.SERVER_HOST }}
+     BACKEND_ENV_FILE: ${{ secrets.BACKEND_ENV_FILE }}
 
     runs-on: ubuntu-latest
 
@@ -114,6 +115,7 @@ jobs:
               docker run -d \
                 --name ${BACKEND_SERVICE_NAME} \
                 --restart unless-stopped \
+                --env-file ${BACKEND_ENV_FILE} \
                 -p ${BACKEND_PORT}:8080 \
                 ${BACKEND_IMAGE}:latest
 
