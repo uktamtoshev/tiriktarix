@@ -58,6 +58,10 @@ export type Hero = {
   titleRu: string | null;
   bioRu: string | null;
   portraitCaptionRu: string | null;
+  /** Buyuklik darajasi (V311): S — timsollar, A — yirik siymolar, B — tanish, C — qolganlar. */
+  fameTier: "S" | "A" | "B" | "C";
+  /** Daraja ichidagi tartib (0–100), kattasi yuqorida. */
+  fameScore: number;
 };
 
 export type HistoricalEvent = {
@@ -120,6 +124,10 @@ export type DuelSide = {
   rankLevel: number;
   /** Kiyilgan NODIR (RARE) jihozlar soni — ustunlikka qo'shiladi. */
   rareEquipped: number;
+  /** Arenada jangchi siluetini chizish uchun. */
+  gender: Gender | null;
+  archetype: string | null;
+  equipped: Partial<Record<EquipSlot, string>>;
 };
 
 /** `question` — DOIM so'rovchining o'z savoli (raqibniki emas). */
@@ -138,6 +146,9 @@ export type DuelState = {
   /** O'yin tugagach — reyting o'zgarishi (manfiy bo'lishi mumkin). */
   ratingDelta: number | null;
 };
+
+/** Ilvirs (AI) darajasi: javob tezligi va aniqligi shundan belgilanadi. */
+export type BotLevel = "OSON" | "ORTA" | "QIYIN";
 
 /** Navbat holati: raqib qidirilmoqda yoki topildi. */
 export type QueueState = {
@@ -369,6 +380,13 @@ export const duelApi = {
       body: JSON.stringify({ clientId: getClientId(), nickname, scope }),
     }),
 
+  /** Ilvirs (AI) bilan mashq jangi: darhol boshlanadi, reytingga yozilmaydi. */
+  bot: (nickname: string, scope: string, level: BotLevel) =>
+    duelCall<DuelState>("/bot", {
+      method: "POST",
+      body: JSON.stringify({ clientId: getClientId(), nickname, scope, level }),
+    }),
+
   /** Kod bo'yicha qo'shilish. Mavzu — o'z tanlovi. */
   join: (code: string, nickname: string, scope: string) =>
     duelCall<DuelState>(`/${code}/join`, {
@@ -479,7 +497,12 @@ export type UnlockType =
   | "ERA_TEST_SCORE"
   | "HERO_QUIZ_SCORE"
   | "RIDDLE_COUNT"
-  | "TALK_HEROES";
+  | "TALK_HEROES"
+  /** Sotib olinadi. XP bilan hech qachon ochilmaydi — narx `priceUzs` da. */
+  | "PAID";
+
+/** Vitrinadagi belgi. Ochilish shartiga ta'sir qilmaydi. */
+export type Rarity = "COMMON" | "RARE";
 
 export type AvatarItem = {
   code: string;
@@ -498,6 +521,10 @@ export type AvatarItem = {
   /** Ruscha matn (V102). null — interfeys o'zbekcha aslini ko'rsatadi. */
   nameRu: string | null;
   descriptionRu: string | null;
+  /** COMMON yoki RARE (V308). */
+  rarity: Rarity;
+  /** So'mda. Faqat `unlockType === "PAID"` bo'lganda to'la, aks holda null. */
+  priceUzs: number | null;
 };
 
 export type AvatarState = {

@@ -102,8 +102,34 @@ public class Hero {
      */
     private String country;
 
+    /**
+     * Buyuklik darajasi (V311): S — milliy timsollar, A — maktab dasturining
+     * yirik siymolari, B — tanish ijodkorlar, C — qolganlar. Zal ro'yxati shu
+     * bo'yicha tartiblanadi — bola birinchi ekranda tanish nomlarni ko'radi.
+     */
+    private String fameTier;
+
+    /** Daraja ichidagi aniq tartib (0–100). Tenglikda ism alifbosi hal qiladi. */
+    private int fameScore;
+
     public Long getId() {
         return id;
+    }
+
+    public String getFameTier() {
+        return fameTier;
+    }
+
+    public void setFameTier(String fameTier) {
+        this.fameTier = fameTier;
+    }
+
+    public int getFameScore() {
+        return fameScore;
+    }
+
+    public void setFameScore(int fameScore) {
+        this.fameScore = fameScore;
     }
 
     public String getPortraitUrl() {

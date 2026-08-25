@@ -43,6 +43,26 @@ export default function AdminHeroesPage() {
         render: (row) =>
           `${formatYear(row.birthYear as number | null)} – ${formatYear(row.deathYear as number | null)}`,
       },
+      {
+        name: "fameTier",
+        label: "Уровень величия",
+        type: "select",
+        options: [
+          { value: "S", label: "S — национальный символ" },
+          { value: "A", label: "A — крупная фигура школьной программы" },
+          { value: "B", label: "B — известен знатокам" },
+          { value: "C", label: "C — остальные" },
+        ],
+        hint: "Определяет порядок в «Зале предков»: S выходит первым",
+        render: (row) => `${String(row.fameTier ?? "C")} · ${String(row.fameScore ?? 0)}`,
+      },
+      {
+        name: "fameScore",
+        label: "Очки величия (0–100)",
+        type: "number",
+        inTable: false,
+        hint: "Точный порядок внутри уровня — больше очков, выше в списке",
+      },
       { name: "portraitEmoji", label: "Эмодзи", inTable: false },
       { name: "greetingUz", label: "Приветствие", type: "textarea", rows: 2, inTable: false },
       { name: "bioUz", label: "Краткая биография", type: "textarea", rows: 3, inTable: false },

@@ -34,7 +34,18 @@ public class AvatarItem {
         /** unlock_value ta kunlik topishmoqni yechish. */
         RIDDLE_COUNT,
         /** unlock_value ta turli qahramon bilan suhbatlashish. */
-        TALK_HEROES
+        TALK_HEROES,
+        /**
+         * Sotib olinadi. Sinfdagi umumiy qoidaga yagona istisno: bu turning
+         * ochiqligi HISOBLANMAYDI, balki avatar_purchases jadvalidan o'qiladi.
+         * unlock_value ishlatilmaydi, narx {@link #getPriceUzs()} da turadi.
+         */
+        PAID
+    }
+
+    /** Vitrinadagi belgi. Ochilish shartiga ta'sir qilmaydi. */
+    public enum Rarity {
+        COMMON, RARE
     }
 
     @Id
@@ -57,6 +68,27 @@ public class AvatarItem {
     private String unlockRef;
 
     private int ordinal;
+
+    // ===== Nodirlik va narx (V308) =====
+
+    /** COMMON yoki RARE. */
+    private String rarity;
+
+    /** So'mda. Faqat PAID jihozda to'ldiriladi, qolganlarida NULL. */
+    private Integer priceUzs;
+
+    public String getRarity() {
+        return rarity;
+    }
+
+    public Integer getPriceUzs() {
+        return priceUzs;
+    }
+
+    /** PAID jihoz XP bilan hech qachon ochilmaydi — faqat sotib olinadi. */
+    public boolean isPaid() {
+        return UnlockType.PAID.name().equals(unlockType);
+    }
 
     // ===== Ruscha matn (V102). NULL — interfeys o'zbekcha asl matnni beradi. =====
 

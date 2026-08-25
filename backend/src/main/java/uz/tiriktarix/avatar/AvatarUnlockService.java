@@ -43,13 +43,16 @@ public class AvatarUnlockService {
      *                       Aynan kunlar sanaladi — topishmoq kuniga bitta
      *                       bo'lgani uchun bir javobni takror yuborish bilan
      *                       kvestni aldab bo'lmaydi.
+     * @param purchasedItems sotib olingan PAID jihozlarning id lari. Suratdagi
+     *                       yagona SAQLANADIGAN ma'lumot: to'lovni profil
+     *                       ko'rsatkichlaridan qayta hisoblab bo'lmaydi.
      */
     public record QuestStats(int xp, int streakDays, int perfectQuizzes, int riddleDays,
                              int heroesTalked, Map<String, Integer> bestEraScore,
-                             Map<String, Integer> bestHeroScore) {
+                             Map<String, Integer> bestHeroScore, Set<Long> purchasedItems) {
 
         static QuestStats empty() {
-            return new QuestStats(0, 0, 0, 0, 0, Map.of(), Map.of());
+            return new QuestStats(0, 0, 0, 0, 0, Map.of(), Map.of(), Set.of());
         }
 
         /** Istalgan davr bo'yicha eng yaxshi natija. */
@@ -79,15 +82,18 @@ public class AvatarUnlockService {
     private final ConversationRepository conversationRepository;
     private final EraRepository eraRepository;
     private final HeroRepository heroRepository;
+    private final AvatarPurchaseRepository purchaseRepository;
 
     public AvatarUnlockService(QuizResultRepository resultRepository,
                                ConversationRepository conversationRepository,
                                EraRepository eraRepository,
-                               HeroRepository heroRepository) {
+                               HeroRepository heroRepository,
+                               AvatarPurchaseRepository purchaseRepository) {
         this.resultRepository = resultRepository;
         this.conversationRepository = conversationRepository;
         this.eraRepository = eraRepository;
         this.heroRepository = heroRepository;
+        this.purchaseRepository = purchaseRepository;
     }
 
     // ========================= Ko'rsatkichlarni yig'ish =========================
@@ -125,8 +131,12 @@ public class AvatarUnlockService {
         int heroesTalked = (int) conversationRepository
                 .countDistinctHeroesByClientId(profile.getClientId());
 
+        Set<Long> purchased = new HashSet<>();
+        purchaseRepository.findByProfileId(profile.getId())
+                .forEach(p -> purchased.add(p.getItemId()));
+
         return new QuestStats(profile.getXp(), profile.getStreakDays(), perfect,
-                riddleDays.size(), heroesTalked, bestEra, bestHero);
+                riddleDays.size(), heroesTalked, bestEra, bestHero, purchased);
     }
 
     /** «era:temuriylar:medium» → «temuriylar». Mos kelmasa — null. */
@@ -165,6 +175,8 @@ public class AvatarUnlockService {
             // Bo'sh ref — «istalgan davr / istalgan qahramon»
             case ERA_TEST_SCORE -> bestEra(s, ref) >= need;
             case HERO_QUIZ_SCORE -> bestHero(s, ref) >= need;
+            // Yagona tur, u hisoblanmaydi: sotib olinganmi yoki yo'q
+            case PAID -> s.purchasedItems().contains(item.getId());
         };
     }
 
@@ -183,6 +195,8 @@ public class AvatarUnlockService {
             // Bu yerda progress «eng yaxshi natijang» degani: 7/9 ball ham ko'rinadi
             case ERA_TEST_SCORE -> new int[]{bestEra(s, ref), need};
             case HERO_QUIZ_SCORE -> new int[]{bestHero(s, ref), need};
+            // Pullik jihozda progress-bar ma'nosiz: yo sotib olingan, yo yo'q
+            case PAID -> new int[]{s.purchasedItems().contains(item.getId()) ? 1 : 0, 1};
         };
     }
 
@@ -221,6 +235,30 @@ public class AvatarUnlockService {
             case HERO_QUIZ_SCORE -> ref == null || ref.isBlank()
                     ? "Istalgan qahramon kvizini " + need + "+ ball bilan yech"
                     : labels.hero(ref) + " kvizini " + need + "+ ball bilan yech";
+            case PAID -> item.getPriceUzs() == null
+                    ? "Do'kondan sotib olinadi"
+                    : formatSum(item.getPriceUzs()) + " so'm";
         };
+    }
+
+    /**
+     * 19900 → «19 900»: bolaga uzun raqamni ajratib ko'rsatgan tushunarliroq.
+     *
+     * Ajratgich — UZILMAS probel (U+00A0), oddiy probel emas: aks holda tor
+     * ekranda narx «19» va «900 so'm» bo'lib ikki qatorga bo'linib ketadi.
+     * Test ham aynan shu belgini kutadi.
+     */
+    private static final char NBSP = '\u00A0';
+
+    private static String formatSum(int sum) {
+        String digits = Integer.toString(sum);
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < digits.length(); i++) {
+            if (i > 0 && (digits.length() - i) % 3 == 0) {
+                out.append(NBSP);
+            }
+            out.append(digits.charAt(i));
+        }
+        return out.toString();
     }
 }

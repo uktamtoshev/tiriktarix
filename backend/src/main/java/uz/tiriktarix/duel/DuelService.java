@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import uz.tiriktarix.avatar.AvatarService;
+import uz.tiriktarix.avatar.AvatarService.AvatarLook;
 import uz.tiriktarix.profile.ProfileService;
 import uz.tiriktarix.quiz.QuizService;
 import uz.tiriktarix.quiz.QuizService.QuestionDto;
@@ -58,6 +59,14 @@ public class DuelService {
     /** Kuchli tomonga (yuqori daraja + nodir jihoz) beriladigan boshlang'ich ball. */
     private static final int ADVANTAGE_BONUS = 1;
 
+    /**
+     * Savolni O'QIMASDAN bosishga qarshi to'siq: javob savol chiqqanidan
+     * kamida shuncha vaqt o'tgach kelishi kerak, aks holda ball berilmaydi
+     * (savol baribir almashadi — xuddi noto'g'ri javobdagidek). Ikki soniyada
+     * savolni o'qib ulgurish mumkin emas — bu tugmalarni tavakkal bosish.
+     */
+    private static final long MIN_ANSWER_MS = 2_000;
+
     /** Tashlab ketilgan xonalar shuncha vaqtdan keyin o'chiriladi. */
     private static final Duration LIFETIME = Duration.ofMinutes(30);
 
@@ -79,6 +88,31 @@ public class DuelService {
 
     public enum QueuePhase { SEARCHING, MATCHED }
 
+    /**
+     * Ilvirs (bot) darajalari. Har birida javob tezligi, aniqlik va «kuch»
+     * (daraja/jihoz) bor — QIYIN darajadagi Ilvirs ustunlik bonusini ham oladi,
+     * xuddi kuchli o'yinchi kabi.
+     */
+    public enum BotLevel {
+        OSON(9_000, 0.45, 2, 0, "oddiy-yigit"),
+        ORTA(7_000, 0.60, 5, 0, "jangchi"),
+        QIYIN(5_000, 0.75, 10, 2, "sarkarda");
+
+        private final int intervalMs;
+        private final double accuracy;
+        private final int rankLevel;
+        private final int rareEquipped;
+        private final String archetype;
+
+        BotLevel(int intervalMs, double accuracy, int rankLevel, int rareEquipped, String archetype) {
+            this.intervalMs = intervalMs;
+            this.accuracy = accuracy;
+            this.rankLevel = rankLevel;
+            this.rareEquipped = rareEquipped;
+            this.archetype = archetype;
+        }
+    }
+
     // ============================== Tashqi DTO'lar ==============================
 
     /**
@@ -86,9 +120,13 @@ public class DuelService {
      *
      * @param rankLevel     XP dan hisoblangan daraja — ustunlik shundan keladi.
      * @param rareEquipped  kiyilgan NODIR (RARE) jihozlar soni.
+     * @param gender        jangchi siluetini chizish uchun — "MALE"/"FEMALE"/null.
+     * @param archetype     jangchi tipi (kiyim-boshi); null bo'lsa jinsga qarab standart tanlanadi.
+     * @param equipped      slot → jihoz kodi (arenada ko'rinadigan jangchi ustida).
      */
     public record SideDto(String nickname, String scope, int score, int rating,
-                          int rankLevel, int rareEquipped) {
+                          int rankLevel, int rareEquipped,
+                          String gender, String archetype, Map<String, String> equipped) {
     }
 
     /** `question` — DOIM so'rovchining o'z savoli; `ratingDelta` — o'yin oxirida. */
@@ -113,20 +151,28 @@ public class DuelService {
         /** XP dan hisoblangan daraja va kiyilgan nodir jihozlar — ustunlik shulardan. */
         private final int rankLevel;
         private final int rareEquipped;
+        /** Arenada jangchini chizish uchun — bir marta olinadi, o'yin davomida o'zgarmaydi. */
+        private final AvatarLook look;
         /** O'yinchining SHAXSIY savollari — tashqariga to'liq chiqmaydi. */
         private final List<QuestionDto> pool;
         private int cursor;
         private int score;
         private Integer ratingDelta;
+        /**
+         * Joriy savol qachon berilgan (epoch ms). 0 — hali javob berilmagan,
+         * ya'ni birinchi savol o'yin boshlanganidan beri turibdi.
+         */
+        private long questionIssuedAt;
 
         private Side(String clientId, String nickname, String scope, int rating,
-                     int rankLevel, int rareEquipped, List<QuestionDto> pool) {
+                     int rankLevel, int rareEquipped, AvatarLook look, List<QuestionDto> pool) {
             this.clientId = clientId;
             this.nickname = nickname;
             this.scope = scope;
             this.ratingAtStart = rating;
             this.rankLevel = rankLevel;
             this.rareEquipped = rareEquipped;
+            this.look = look;
             this.pool = pool;
         }
 
@@ -141,7 +187,39 @@ public class DuelService {
         }
 
         private SideDto toDto() {
-            return new SideDto(nickname, scope, score, ratingAtStart, rankLevel, rareEquipped);
+            return new SideDto(nickname, scope, score, ratingAtStart, rankLevel, rareEquipped,
+                    look.gender(), look.archetype(), look.equipped());
+        }
+    }
+
+    /**
+     * Ilvirsning oldindan tuzilgan o'yin rejasi. Alohida taymer YO'Q — xuddi
+     * reyting hisobidagi kabi: har poll kelganda o'tgan vaqtdan nechta javob
+     * berilgani hisoblanadi. Reja o'yin boshida bir marta tuziladi, shuning
+     * uchun natija poll'lar orasida deterministik.
+     */
+    private static final class BotPlan {
+        private final int intervalMs;
+        private final boolean[] correct;
+        /** O'yin boshidagi hisob — ustunlik bonusi shu yerda saqlanib qoladi. */
+        private final int baseScore;
+
+        private BotPlan(int intervalMs, boolean[] correct, int baseScore) {
+            this.intervalMs = intervalMs;
+            this.correct = correct;
+            this.baseScore = baseScore;
+        }
+
+        private int scoreAt(long elapsedMs) {
+            long capped = Math.min(elapsedMs, ROUND_SECONDS * 1000L);
+            int answered = (int) Math.min(capped / intervalMs, correct.length);
+            int score = baseScore;
+            for (int i = 0; i < answered; i++) {
+                if (correct[i]) {
+                    score++;
+                }
+            }
+            return score;
         }
     }
 
@@ -155,6 +233,8 @@ public class DuelService {
         private Side guest;
         private Instant startedAt;
         private boolean rated;
+        /** null — oddiy PvP; aks holda mehmon tomonda Ilvirs o'ynaydi. */
+        private BotPlan botPlan;
 
         private Duel(String code, Side host, boolean ranked) {
             this.code = code;
@@ -355,9 +435,11 @@ public class DuelService {
         Power powerA = powerOf(a.clientId);
         Power powerB = powerOf(b.clientId);
         Side host = new Side(a.clientId, a.nickname, a.scope, a.rating,
-                powerA.rankLevel(), powerA.rareEquipped(), quizService.duelPool(a.scope));
+                powerA.rankLevel(), powerA.rareEquipped(), avatarService.lookOf(a.clientId),
+                quizService.duelPool(a.scope));
         Side guest = new Side(b.clientId, b.nickname, b.scope, b.rating,
-                powerB.rankLevel(), powerB.rareEquipped(), quizService.duelPool(b.scope));
+                powerB.rankLevel(), powerB.rareEquipped(), avatarService.lookOf(b.clientId),
+                quizService.duelPool(b.scope));
         applyAdvantage(host, guest);
         Duel duel = new Duel(nextFreeCode(), host, true);
         duel.guest = guest;
@@ -392,8 +474,42 @@ public class DuelService {
         Power power = powerOf(clientId);
         Side host = new Side(clientId, cleanNickname(nickname, "Chaqiruvchi"), scope,
                 profileService.duelRating(clientId), power.rankLevel(), power.rareEquipped(),
-                quizService.duelPool(scope));
+                avatarService.lookOf(clientId), quizService.duelPool(scope));
         Duel duel = new Duel(nextFreeCode(), host, false);
+        rooms.put(duel.code, duel);
+        return state(duel, host);
+    }
+
+    // ============================== Ilvirs bilan o'yin ==============================
+
+    /** Ilvirs (bot) tomonining doimiy clientId si — profil yaratilmaydi, reyting yozilmaydi. */
+    private static final String BOT_CLIENT_ID = "ilvirs-bot";
+
+    /**
+     * Ilvirs bilan mashq jangi. Xona ochilishi bilanoq boshlanadi: Ilvirs doim
+     * tayyor, kod va kutish yo'q. Natija reytingga YOZILMAYDI — bu mashq,
+     * mag'lubiyat bolani jazolamasligi kerak.
+     */
+    public DuelStateDto createBot(String clientId, String nickname, String scope, BotLevel level) {
+        sweepExpired();
+        Power power = powerOf(clientId);
+        Side host = new Side(clientId, cleanNickname(nickname, "O'yinchi"), scope,
+                profileService.duelRating(clientId), power.rankLevel(), power.rareEquipped(),
+                avatarService.lookOf(clientId), quizService.duelPool(scope));
+        Side bot = new Side(BOT_CLIENT_ID, "Ilvirs", scope, 1000,
+                level.rankLevel, level.rareEquipped,
+                new AvatarLook("MALE", level.archetype, Map.of()),
+                quizService.duelPool(scope));
+        applyAdvantage(host, bot);
+        // Reja bir marta tuziladi — natija poll'lar orasida o'zgarib qolmaydi
+        boolean[] correct = new boolean[ROUND_SECONDS * 1000 / level.intervalMs + 1];
+        for (int i = 0; i < correct.length; i++) {
+            correct[i] = random.nextDouble() < level.accuracy;
+        }
+        Duel duel = new Duel(nextFreeCode(), host, false);
+        duel.guest = bot;
+        duel.botPlan = new BotPlan(level.intervalMs, correct, bot.score);
+        duel.startedAt = Instant.now();
         rooms.put(duel.code, duel);
         return state(duel, host);
     }
@@ -416,7 +532,7 @@ public class DuelService {
             Power power = powerOf(clientId);
             duel.guest = new Side(clientId, cleanNickname(nickname, "Raqib"), scope,
                     profileService.duelRating(clientId), power.rankLevel(), power.rareEquipped(),
-                    quizService.duelPool(scope));
+                    avatarService.lookOf(clientId), quizService.duelPool(scope));
             applyAdvantage(duel.host, duel.guest);
             return state(duel, duel.guest);
         }
@@ -453,6 +569,8 @@ public class DuelService {
     /**
      * Javob. Tekshiruv SERVERDA: mijoz «to'g'ri javob berdim» deb ayta olmaydi.
      * Noto'g'ri javobda ball qo'shilmaydi, ammo savol baribir almashadi.
+     * 2 soniyadan tez kelgan javob ham hisoblanmaydi ({@link #MIN_ANSWER_MS}) —
+     * savolni o'qimasdan tavakkal bosish ball keltirmasin.
      */
     public DuelStateDto answer(String code, String clientId, Long questionId, int chosenIndex) {
         Duel duel = require(code);
@@ -466,10 +584,16 @@ public class DuelService {
             if (!side.current().id().equals(questionId)) {
                 return state(duel, side);
             }
-            if (quizService.check(questionId, chosenIndex).correct()) {
+            long now = System.currentTimeMillis();
+            long issuedAt = side.questionIssuedAt != 0
+                    ? side.questionIssuedAt
+                    : duel.startedAt.toEpochMilli();
+            boolean tooFast = now - issuedAt < MIN_ANSWER_MS;
+            if (!tooFast && quizService.check(questionId, chosenIndex).correct()) {
                 side.score++;
             }
             side.cursor++;
+            side.questionIssuedAt = now;
             return state(duel, side);
         }
     }
@@ -498,6 +622,11 @@ public class DuelService {
                 duel.startedAt = Instant.now();
             }
         }
+        // Ilvirs javoblari: taymersiz, o'tgan vaqtdan qayta hisoblanadi
+        if (duel.botPlan != null && duel.startedAt != null) {
+            duel.guest.score = duel.botPlan.scoreAt(
+                    Duration.between(duel.startedAt, Instant.now()).toMillis());
+        }
         Phase phase = duel.phase();
         if (phase == Phase.FINISHED) {
             applyRating(duel);
@@ -522,6 +651,10 @@ public class DuelService {
             return;
         }
         duel.rated = true;
+        // Ilvirs bilan o'yin — mashq: reyting yozilmaydi, bot profili ham yaratilmaydi
+        if (duel.botPlan != null) {
+            return;
+        }
         Side a = duel.host;
         Side b = duel.guest;
         double actualA = result(a, b);

@@ -36,6 +36,10 @@ public class DuelController {
     public record AnswerRequest(@NotBlank String clientId, @NotNull Long questionId, int chosenIndex) {
     }
 
+    public record BotRequest(@NotBlank String clientId, String nickname, @NotBlank String scope,
+                             @NotNull DuelService.BotLevel level) {
+    }
+
     private final DuelService duelService;
 
     public DuelController(DuelService duelService) {
@@ -66,6 +70,13 @@ public class DuelController {
     @PostMapping
     public DuelStateDto create(@Valid @RequestBody CreateRequest request) {
         return duelService.create(request.clientId(), request.nickname(), request.scope());
+    }
+
+    /** Ilvirs bilan mashq jangi: darhol boshlanadi, reytingga yozilmaydi. */
+    @PostMapping("/bot")
+    public DuelStateDto createBot(@Valid @RequestBody BotRequest request) {
+        return duelService.createBot(request.clientId(), request.nickname(), request.scope(),
+                request.level());
     }
 
     /** Kod bo'yicha qo'shilish. Mavzu o'z tanlovi — chaqiruvchinikidan farq qilishi mumkin. */

@@ -41,6 +41,9 @@ const TXT = {
     takeOff: "Снять",
     putOn: "Надеть",
     task: "Задание",
+    rare: "Редкое",
+    price: "Цена",
+    shopSoon: "Магазин пока не открыт",
   },
   uz: {
     slots: {
@@ -70,6 +73,9 @@ const TXT = {
     takeOff: "Yechish",
     putOn: "Kiyish",
     task: "Topshiriq",
+    rare: "Nodir",
+    price: "Narxi",
+    shopSoon: "Do'kon hali ochilmagan",
   },
   uk: {
     slots: {
@@ -98,6 +104,9 @@ const TXT = {
     takeOff: "Зняти",
     putOn: "Вдягнути",
     task: "Завдання",
+    rare: "Рідкісне",
+    price: "Ціна",
+    shopSoon: "Крамниця ще не відкрита",
   },
 };
 
@@ -323,6 +332,12 @@ export default function QurolxonaPage() {
                             {t.materials[material.prefix]}
                           </span>
                         )}
+                        {/* Nodirlik belgisi ochilishga ta'sir qilmaydi — faqat ko'z uchun */}
+                        {item.rarity === "RARE" && (
+                          <span className="rounded-sm border border-feruza/50 bg-feruza/15 px-1.5 py-0.5 font-display text-[8px] font-semibold uppercase tracking-[0.14em] text-feruza-bright">
+                            {t.rare}
+                          </span>
+                        )}
                       </div>
                       <h3
                         className={`mt-1 font-display text-sm font-bold uppercase leading-snug ${
@@ -342,6 +357,25 @@ export default function QurolxonaPage() {
                           >
                             {worn ? t.takeOff : t.putOn}
                           </Button>
+                        </div>
+                      ) : item.unlockType === "PAID" ? (
+                        /*
+                          Pullik jihozda topshiriq YO'Q — uni XP bilan ochib
+                          bo'lmaydi, faqat sotib olinadi. Shuning uchun bu yerda
+                          progress-bar ham ko'rsatilmaydi: u yolg'on umid berardi.
+                          To'lov hali ulanmagan, shuning uchun tugma o'rniga
+                          halol yozuv turadi.
+                        */
+                        <div className="mt-4 rounded-sm border border-zar/30 bg-obsidian/40 p-3">
+                          <p className="font-display text-[9px] font-semibold uppercase tracking-[0.2em] text-zar/80">
+                            {t.price}
+                          </p>
+                          <p className="mt-1.5 font-display text-base font-bold text-zar-bright">
+                            {item.requirementUz}
+                          </p>
+                          <p className="mt-1.5 text-[10px] leading-relaxed text-dust/80">
+                            {t.shopSoon}
+                          </p>
                         </div>
                       ) : (
                         /*

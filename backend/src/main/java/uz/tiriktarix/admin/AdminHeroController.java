@@ -47,6 +47,7 @@ public class AdminHeroController {
                           List<String> onTopicKeywords,
                           String portraitFullUrl, String accent,
                           String nameRu, String titleRu, String bioRu, String portraitCaptionRu,
+                          String fameTier, int fameScore,
                           long factCards, long quizQuestions, long films, long conversations) {
     }
 
@@ -57,7 +58,8 @@ public class AdminHeroController {
                               String biographyUz, String biographySources, Boolean biographyVerified,
                               List<String> onTopicKeywords,
                               String portraitFullUrl, String accent,
-                              String nameRu, String titleRu, String bioRu, String portraitCaptionRu) {
+                              String nameRu, String titleRu, String bioRu, String portraitCaptionRu,
+                              String fameTier, Integer fameScore) {
     }
 
     private final HeroRepository heroRepository;
@@ -164,6 +166,16 @@ public class AdminHeroController {
         hero.setTitleRu(optional(request.titleRu()));
         hero.setBioRu(optional(request.bioRu()));
         hero.setPortraitCaptionRu(optional(request.portraitCaptionRu()));
+        // Buyuklik (V311). Berilmasa — C/0: yangi ajdod ro'yxat oxiriga tushadi.
+        String tier = optional(request.fameTier());
+        hero.setFameTier(tier == null ? "C"
+                : AdminSupport.oneOf(tier, "Уровень величия", "S", "A", "B", "C"));
+        int score = request.fameScore() == null ? 0 : request.fameScore();
+        if (score < 0 || score > 100) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Очки величия — от 0 до 100");
+        }
+        hero.setFameScore(score);
     }
 
     private HeroDto toDto(Hero h) {
@@ -174,6 +186,7 @@ public class AdminHeroController {
                 h.getOnTopicKeywords() == null ? List.of() : h.getOnTopicKeywords(),
                 h.getPortraitFullUrl(), h.getAccent(),
                 h.getNameRu(), h.getTitleRu(), h.getBioRu(), h.getPortraitCaptionRu(),
+                h.getFameTier(), h.getFameScore(),
                 factCardRepository.countByHeroId(h.getId()),
                 quizQuestionRepository.countByHeroId(h.getId()),
                 filmRepository.countByHeroId(h.getId()),

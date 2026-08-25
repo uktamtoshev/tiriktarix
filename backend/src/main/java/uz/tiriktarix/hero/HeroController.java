@@ -23,7 +23,8 @@ public class HeroController {
                           boolean biographyVerified,
                           String portraitFullUrl, String accent,
                           String nameRu, String titleRu, String bioRu,
-                          String portraitCaptionRu) {
+                          String portraitCaptionRu,
+                          String fameTier, int fameScore) {
 
         static HeroDto from(Hero h) {
             return new HeroDto(h.getId(), h.getSlug(), h.getNameUz(), h.getTitleUz(),
@@ -35,7 +36,8 @@ public class HeroController {
                     h.isBiographyVerified(),
                     h.getPortraitFullUrl(), h.getAccent(),
                     h.getNameRu(), h.getTitleRu(), h.getBioRu(),
-                    h.getPortraitCaptionRu());
+                    h.getPortraitCaptionRu(),
+                    h.getFameTier(), h.getFameScore());
         }
     }
 
@@ -45,10 +47,10 @@ public class HeroController {
         this.heroRepository = heroRepository;
     }
 
-    /** Ajdodlar ro'yxati. {@code country} berilmasa — o'zbek tarixi (V105). */
+    /** Ajdodlar ro'yxati buyuklik tartibida. {@code country} berilmasa — o'zbek tarixi (V105). */
     @GetMapping
     public List<HeroDto> list(@RequestParam(required = false) String country) {
-        return heroRepository.findByCountry(Countries.normalize(country))
+        return heroRepository.findByCountryOrderByFame(Countries.normalize(country))
                 .stream().map(HeroDto::from).toList();
     }
 

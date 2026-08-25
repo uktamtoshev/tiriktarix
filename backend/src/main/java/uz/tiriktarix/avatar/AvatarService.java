@@ -26,11 +26,16 @@ public class AvatarService {
     /** Ro'yxatdan o'tganda darhol kiyiladigan boshlang'ich jihoz. */
     private static final List<String> STARTER_ITEMS = List.of("oddiy-chopon", "doppi");
 
+    /**
+     * @param rarity   COMMON yoki RARE — vitrinadagi belgi.
+     * @param priceUzs faqat PAID jihozda to'la, qolganlarida null.
+     */
     public record ItemView(String code, String nameUz, String slot, String descriptionUz,
                            String unlockType, int unlockValue, String unlockRef,
                            String requirementUz, boolean unlocked,
                            int progress, int target,
-                           String nameRu, String descriptionRu) {
+                           String nameRu, String descriptionRu,
+                           String rarity, Integer priceUzs) {
     }
 
     public record AvatarState(String gender, String archetype, Map<String, String> equipped,
@@ -66,16 +71,10 @@ public class AvatarService {
         QuestStats stats = unlockService.statsOf(profile);
         Labels labels = unlockService.labels();
 
-        Map<String, String> equipped = new LinkedHashMap<>();
         Map<Long, AvatarItem> byId = new LinkedHashMap<>();
         List<AvatarItem> all = itemRepository.findAllByOrderByOrdinalAsc();
         all.forEach(i -> byId.put(i.getId(), i));
-        for (AvatarEquipment e : equipmentRepository.findByProfileId(profile.getId())) {
-            AvatarItem item = byId.get(e.getItemId());
-            if (item != null) {
-                equipped.put(e.getSlot(), item.getCode());
-            }
-        }
+        Map<String, String> equipped = equippedOf(profile.getId(), byId);
 
         List<ItemView> views = new ArrayList<>();
         for (AvatarItem item : all) {
@@ -85,9 +84,41 @@ public class AvatarService {
                     item.getDescriptionUz(), item.getUnlockType(), item.getUnlockValue(),
                     item.getUnlockRef(), AvatarUnlockService.requirementUz(item, labels),
                     unlocked, Math.min(p[0], p[1]), p[1],
-                    item.getNameRu(), item.getDescriptionRu()));
+                    item.getNameRu(), item.getDescriptionRu(),
+                    item.getRarity(), item.getPriceUzs()));
         }
         return new AvatarState(profile.getAvatarGender(), archetypeOf(profile), equipped, views);
+    }
+
+    private Map<String, String> equippedOf(Long profileId, Map<Long, AvatarItem> byId) {
+        Map<String, String> equipped = new LinkedHashMap<>();
+        for (AvatarEquipment e : equipmentRepository.findByProfileId(profileId)) {
+            AvatarItem item = byId.get(e.getItemId());
+            if (item != null) {
+                equipped.put(e.getSlot(), item.getCode());
+            }
+        }
+        return equipped;
+    }
+
+    /** Bellashuv arenasida jangchini chizish uchun — butun katalogsiz, faqat ko'rinish. */
+    public record AvatarLook(String gender, String archetype, Map<String, String> equipped) {
+    }
+
+    /**
+     * Bellashuv uchun yengil ko'rinish: jins, tip, kiyilgan jihozlar — jihoz
+     * kataloги va ochilish holati kerak emas ({@link #stateOf} dan farqi shu).
+     */
+    @Transactional(readOnly = true)
+    public AvatarLook lookOf(String clientId) {
+        return profileRepository.findByClientId(clientId)
+                .map(profile -> {
+                    Map<Long, AvatarItem> byId = new LinkedHashMap<>();
+                    itemRepository.findAllByOrderByOrdinalAsc().forEach(i -> byId.put(i.getId(), i));
+                    return new AvatarLook(profile.getAvatarGender(), archetypeOf(profile),
+                            equippedOf(profile.getId(), byId));
+                })
+                .orElseGet(() -> new AvatarLook(null, null, Map.of()));
     }
 
     /**

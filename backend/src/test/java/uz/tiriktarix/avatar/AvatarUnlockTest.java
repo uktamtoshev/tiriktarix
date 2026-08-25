@@ -1,5 +1,6 @@
 package uz.tiriktarix.avatar;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -10,6 +11,7 @@ import static org.mockito.Mockito.when;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import uz.tiriktarix.avatar.AvatarUnlockService.Labels;
 import uz.tiriktarix.avatar.AvatarUnlockService.QuestStats;
@@ -48,12 +50,24 @@ class AvatarUnlockTest {
 
     /** Faqat XP va seriyasi bo'lgan surat. */
     private static QuestStats profile(int xp, int streakDays) {
-        return new QuestStats(xp, streakDays, 0, 0, 0, Map.of(), Map.of());
+        return new QuestStats(xp, streakDays, 0, 0, 0, Map.of(), Map.of(), Set.of());
     }
 
     private static QuestStats quests(int perfect, int riddleDays, int heroesTalked,
                                      Map<String, Integer> eras, Map<String, Integer> heroes) {
-        return new QuestStats(0, 0, perfect, riddleDays, heroesTalked, eras, heroes);
+        return new QuestStats(0, 0, perfect, riddleDays, heroesTalked, eras, heroes, Set.of());
+    }
+
+    /** Sotib olingan jihozlari bo'lgan surat — faqat PAID uchun kerak. */
+    private static QuestStats withPurchases(Long... itemIds) {
+        return new QuestStats(0, 0, 0, 0, 0, Map.of(), Map.of(), Set.of(itemIds));
+    }
+
+    private static AvatarItem paidItem(long id, int priceUzs) {
+        AvatarItem i = item("BODY", "PAID", 0);
+        set(i, "id", id);
+        set(i, "priceUzs", priceUzs);
+        return i;
     }
 
     // ===================== Eski shartlar (1.0) o'zgarmadi =====================
@@ -234,5 +248,55 @@ class AvatarUnlockTest {
 
         assertEquals("jangchi", archetypes.defaultFor("MALE"));
         assertEquals("malika", archetypes.defaultFor("FEMALE"));
+    }
+
+    // ========================= Pullik jihozlar (V308) =========================
+
+    /**
+     * Eng muhim tekshiruv: pullik jihozni XP bilan ochib bo'lmaydi. Agar bu
+     * buzilsa, do'kon ma'nosini yo'qotadi va bola pul to'lamay hammasini oladi.
+     */
+    @Test
+    void paidItemNeverUnlocksByProgress() {
+        AvatarItem paid = paidItem(42L, 19900);
+
+        assertFalse(AvatarUnlockService.isUnlocked(paid, profile(0, 0)));
+        assertFalse(AvatarUnlockService.isUnlocked(paid, profile(1_000_000, 365)),
+                "million XP ham pullik jihozni ochmaydi");
+        assertFalse(AvatarUnlockService.isUnlocked(paid,
+                        quests(500, 500, 500, Map.of("temuriylar", 10), Map.of("amir-temur", 10))),
+                "bajarilgan kvestlar ham pullik jihozni ochmaydi");
+    }
+
+    /** Sotib olingandan keyin ochiladi — va faqat aynan o'sha jihoz. */
+    @Test
+    void paidItemUnlocksOnlyAfterItsOwnPurchase() {
+        AvatarItem bought = paidItem(42L, 19900);
+        AvatarItem other = paidItem(43L, 14900);
+
+        assertTrue(AvatarUnlockService.isUnlocked(bought, withPurchases(42L)));
+        assertFalse(AvatarUnlockService.isUnlocked(other, withPurchases(42L)),
+                "bitta jihozni sotib olish boshqasini ochmaydi");
+    }
+
+    /** Progress-barda pullik jihoz ikki holatli: 0/1 yoki 1/1. */
+    @Test
+    void paidItemProgressIsBinary() {
+        AvatarItem paid = paidItem(42L, 19900);
+
+        assertArrayEquals(new int[]{0, 1}, AvatarUnlockService.progressOf(paid, profile(999999, 99)));
+        assertArrayEquals(new int[]{1, 1}, AvatarUnlockService.progressOf(paid, withPurchases(42L)));
+    }
+
+    /** Kartochkada narx bo'sh joysiz emas, ajratib yoziladi: «19 900 so'm». */
+    @Test
+    void paidRequirementShowsFormattedPrice() {
+        Labels labels = new Labels(Map.of(), Map.of());
+
+        // \u00A0 — uzilmas probel: narx ikki qatorga bo'linib ketmasligi kerak
+        assertEquals("19\u00A0900 so'm",
+                AvatarUnlockService.requirementUz(paidItem(42L, 19900), labels));
+        assertEquals("9\u00A0900 so'm",
+                AvatarUnlockService.requirementUz(paidItem(43L, 9900), labels));
     }
 }

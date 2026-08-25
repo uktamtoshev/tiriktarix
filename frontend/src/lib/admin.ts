@@ -201,6 +201,9 @@ export type AdminHero = {
   biographySources: string | null;
   biographyVerified: boolean;
   onTopicKeywords: string[];
+  /** Buyuklik darajasi (V311): zal ro'yxati shu bo'yicha tartiblanadi. */
+  fameTier: "S" | "A" | "B" | "C";
+  fameScore: number;
   factCards: number;
   quizQuestions: number;
   films: number;

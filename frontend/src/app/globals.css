@@ -379,6 +379,21 @@ summary:focus-visible,
   transform-box: fill-box;
 }
 
+/* Bellashuv: to'g'ri javobda jangchi «zarba uradi», ustiga «+1» uchib chiqadi */
+@keyframes tt-lunge-kf {
+  0% { transform: translateX(0) scale(1); }
+  35% { transform: translateX(6px) scale(1.06); }
+  100% { transform: translateX(0) scale(1); }
+}
+.tt-lunge { animation: tt-lunge-kf 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
+@keyframes tt-dmg-float-kf {
+  0% { opacity: 0; transform: translate(-50%, 0) scale(0.8); }
+  15% { opacity: 1; transform: translate(-50%, -6px) scale(1.1); }
+  100% { opacity: 0; transform: translate(-50%, -28px) scale(1); }
+}
+.tt-dmg-float { animation: tt-dmg-float-kf 0.7s ease-out both; }
+
 /* Chat «yozmoqda…» nuqtalari */
 @keyframes bounce-dot {
   0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }

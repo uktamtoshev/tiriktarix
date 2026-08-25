@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { api, duelApi, DuelState, Era, Hero, QueueState } from "@/lib/api";
+import { api, BotLevel, duelApi, DuelState, Era, Hero, QueueState } from "@/lib/api";
 import { eraEmoji } from "@/lib/eras";
 import { shuffled } from "@/lib/quiz";
 import SectionTitle from "@/components/ui/SectionTitle";
@@ -11,6 +11,7 @@ import { useLang, useT } from "@/lib/lang";
 import { countryQuery, useCountry } from "@/lib/country";
 import { heroName } from "@/lib/heroes.ru";
 import { eraName } from "@/lib/content.ru";
+import WarriorFigure from "@/components/art/WarriorFigure";
 
 const TXT = {
   ru: {
@@ -70,6 +71,12 @@ const TXT = {
     playAgain: "Ещё одно состязание",
     levelShort: "Ур.",
     advantage: "Преимущество: более высокий ранг и редкая экипировка",
+    aiMode: "Тренировка",
+    aiTitle: "Дуэль с Илвирсом",
+    aiHint: "Илвирс всегда готов сразиться. Выбери сложность — результат не влияет на рейтинг.",
+    aiStart: "Сразиться с Илвирсом",
+    aiLevel: "Сложность",
+    aiLevels: { OSON: "Лёгкий", ORTA: "Средний", QIYIN: "Сложный" } as Record<BotLevel, string>,
   },
   uz: {
     error: "Xatolik yuz berdi",
@@ -128,6 +135,12 @@ const TXT = {
     playAgain: "Yana bellashuv",
     levelShort: "Dar.",
     advantage: "Ustunlik: yuqori daraja va nodir jihoz",
+    aiMode: "Mashq",
+    aiTitle: "Ilvirs bilan jang",
+    aiHint: "Ilvirs doim shay. Qiyinlikni tanla — natija reytingga ta'sir qilmaydi.",
+    aiStart: "Ilvirs bilan bellash",
+    aiLevel: "Qiyinlik",
+    aiLevels: { OSON: "Oson", ORTA: "O'rta", QIYIN: "Qiyin" } as Record<BotLevel, string>,
   },
   uk: {
     error: "Сталася помилка",
@@ -186,6 +199,12 @@ const TXT = {
     playAgain: "Ще одна дуель",
     levelShort: "Рів.",
     advantage: "Перевага: вищий ранг і рідкісна екіпіровка",
+    aiMode: "Тренування",
+    aiTitle: "Дуель з Ілвірсом",
+    aiHint: "Ілвірс завжди готовий до бою. Обери складність — результат не впливає на рейтинг.",
+    aiStart: "Битися з Ілвірсом",
+    aiLevel: "Складність",
+    aiLevels: { OSON: "Легкий", ORTA: "Середній", QIYIN: "Складний" } as Record<BotLevel, string>,
   },
 };
 
@@ -203,12 +222,18 @@ const TXT = {
  *   «Do'st bilan» — kod orqali: xona ochiladi, kod aytiladi. Reytingsiz.
  */
 
-type Step = "mode" | "quick" | "searching" | "create" | "join" | "room";
+type Step = "mode" | "quick" | "searching" | "create" | "join" | "ai" | "room";
 
 /** Mavzu tanlovi: davr yoki ajdod. `scope` serverdagi format bilan bir xil. */
 type Topic = { scope: string; label: string; emoji: string };
 
 const POLL_MS = 1000;
+
+/** Ustunlik chizig'idagi «mening» ulushim (%) — hisob nolda bo'lsa teng bo'linadi. */
+function powerShare(mine: number, other: number): number {
+  const total = mine + other;
+  return total === 0 ? 50 : (mine / total) * 100;
+}
 
 export default function DuelPage() {
   const t = useT(TXT);
@@ -220,14 +245,40 @@ export default function DuelPage() {
   const [nickname, setNickname] = useState("");
   const [topic, setTopic] = useState<Topic | null>(null);
   const [codeInput, setCodeInput] = useState("");
+  const [botLevel, setBotLevel] = useState<BotLevel>("ORTA");
   const [duel, setDuel] = useState<DuelState | null>(null);
   const [queue, setQueue] = useState<QueueState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [picked, setPicked] = useState<number | null>(null);
+  /** Kim hozir zarba urdi — jangchi animatsiyasini shu tomonga qo'shamiz. */
+  const [hitSide, setHitSide] = useState<"me" | "opponent" | null>(null);
 
   /** Javob yuborilayotgan payt kelgan poll javobi eskirgan bo'lishi mumkin. */
   const answering = useRef(false);
+  /** Hisob oshganini payqash uchun — poll orasida qaysi tomon ball olganini bilamiz. */
+  const prevScores = useRef({ me: 0, opponent: 0 });
+
+  // Hisob oshganda — jangda zarba: shu tomon jangchisi "hujum" animatsiyasini,
+  // raqibi esa "silkinish"ni ko'rsatadi. Bir soniyalik pollingga mos, chunki
+  // hisob faqat server javobi bilan o'zgaradi.
+  useEffect(() => {
+    if (!duel) return;
+    const meScore = duel.me.score;
+    const oppScore = duel.opponent?.score ?? 0;
+    if (meScore > prevScores.current.me) {
+      setHitSide("me");
+    } else if (oppScore > prevScores.current.opponent) {
+      setHitSide("opponent");
+    }
+    prevScores.current = { me: meScore, opponent: oppScore };
+  }, [duel]);
+
+  useEffect(() => {
+    if (!hitSide) return;
+    const id = setTimeout(() => setHitSide(null), 650);
+    return () => clearTimeout(id);
+  }, [hitSide]);
 
   useEffect(() => {
     /* Bayroq almashtirilganda IKKALA so'rov ham yo'lda bo'ladi va keyin
@@ -396,6 +447,22 @@ export default function DuelPage() {
           </div>
         </Panel>
 
+        {/* Mashq: Ilvirs bilan — raqib kutilmaydi, reyting o'zgarmaydi */}
+        <Panel corners className="p-7 text-center sm:p-8">
+          <p className="font-display text-[11px] font-semibold uppercase tracking-[0.3em] text-feruza-bright/90">
+            {t.aiMode}
+          </p>
+          <h2 className="mt-3 font-display text-xl font-bold uppercase tracking-[0.05em] text-marble sm:text-2xl">
+            🐆 {t.aiTitle}
+          </h2>
+          <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-dust">{t.aiHint}</p>
+          <div className="mt-6">
+            <Button variant="steel" onClick={() => setStep("ai")}>
+              {t.aiStart}
+            </Button>
+          </div>
+        </Panel>
+
         {/* Ikkinchi yo'l: tanish bilan, kod orqali */}
         <div>
           <p className="mb-4 text-center font-display text-[11px] font-semibold uppercase tracking-[0.3em] text-dust">
@@ -426,9 +493,10 @@ export default function DuelPage() {
 
   // ======================= 2-bosqich: ism, kod, mavzu =======================
 
-  if (step === "quick" || step === "create" || step === "join") {
+  if (step === "quick" || step === "create" || step === "join" || step === "ai") {
     const joining = step === "join";
     const quick = step === "quick";
+    const ai = step === "ai";
     const ready = topic !== null && (!joining || codeInput.trim().length === 4);
     return (
       <div className="space-y-8">
@@ -439,8 +507,8 @@ export default function DuelPage() {
 
         <SectionTitle
           align="left"
-          overline={quick ? t.ranked : joining ? t.opponentRole : t.hostRole}
-          title={quick ? t.findOpponent : joining ? t.joinRoom : t.createRoom}
+          overline={ai ? t.aiMode : quick ? t.ranked : joining ? t.opponentRole : t.hostRole}
+          title={ai ? t.aiTitle : quick ? t.findOpponent : joining ? t.joinRoom : t.createRoom}
         />
 
         <Panel corners className="space-y-6 p-6 sm:p-7">
@@ -498,6 +566,30 @@ export default function DuelPage() {
             </div>
           </div>
 
+          {ai && (
+            <div>
+              <span className="font-display text-[11px] font-semibold uppercase tracking-[0.24em] text-zar/90">
+                {t.aiLevel}
+              </span>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {(["OSON", "ORTA", "QIYIN"] as const).map((level) => (
+                  <button
+                    key={level}
+                    onClick={() => setBotLevel(level)}
+                    aria-pressed={botLevel === level}
+                    className={`rounded-md border px-4 py-2 text-sm transition-colors ${
+                      botLevel === level
+                        ? "border-zar/70 bg-zar/15 text-marble"
+                        : "border-steel-2 text-dust hover:border-zar/40 hover:text-marble"
+                    }`}
+                  >
+                    {t.aiLevels[level]}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {error && <p className="text-sm text-[#e0a094]">{error}</p>}
 
           <Button
@@ -507,13 +599,15 @@ export default function DuelPage() {
               quick
                 ? startSearch()
                 : run(() =>
-                    joining
-                      ? duelApi.join(codeInput.trim(), nickname, topic!.scope)
-                      : duelApi.create(nickname, topic!.scope),
+                    ai
+                      ? duelApi.bot(nickname, topic!.scope, botLevel)
+                      : joining
+                        ? duelApi.join(codeInput.trim(), nickname, topic!.scope)
+                        : duelApi.create(nickname, topic!.scope),
                   )
             }
           >
-            {busy ? t.waiting : quick ? t.findOpponent : joining ? t.join : t.getCode}
+            {busy ? t.waiting : ai ? t.aiStart : quick ? t.findOpponent : joining ? t.join : t.getCode}
           </Button>
         </Panel>
       </div>
@@ -580,15 +674,20 @@ export default function DuelPage() {
     <div className="space-y-6">
       {backButton(reset, t.leaveDuel)}
 
-      {/* Umumiy tablo: ikkalasi ko'radigan yagona narsa */}
-      <Panel corners className="p-5 sm:p-6">
-        <div className="flex items-center justify-between gap-4">
-          <Sideboard
+      {/* Jang maydoni: ikki jangchi, ustunlik chizig'i va vaqt tasmasi */}
+      <Panel corners girih className="relative overflow-hidden p-5 sm:p-6">
+        <div className="flex items-start justify-between gap-2 sm:gap-4">
+          <Fighter
             name={duel.me.nickname}
             rating={duel.me.rating}
             topic={labelOf(duel.me.scope)}
             rankLevel={duel.me.rankLevel}
             rareEquipped={duel.me.rareEquipped}
+            gender={duel.me.gender}
+            archetype={duel.me.archetype}
+            equipped={duel.me.equipped}
+            score={duel.me.score}
+            hit={hitSide === "me"}
             advantage={
               duel.opponent != null &&
               duel.me.rankLevel + duel.me.rareEquipped >
@@ -598,20 +697,17 @@ export default function DuelPage() {
             levelLabel={t.levelShort}
             mine
           />
-          <div className="shrink-0 text-center">
-            <p className="font-display text-3xl font-bold tracking-[0.08em] text-marble sm:text-4xl">
-              {duel.me.score} : {duel.opponent?.score ?? 0}
-            </p>
-            <p className="mt-1 font-display text-[10px] uppercase tracking-[0.3em] text-dust">
-              {duel.phase === "RUNNING" ? t.seconds(duel.secondsLeft) : t.score}
-            </p>
-          </div>
-          <Sideboard
+          <Fighter
             name={duel.opponent?.nickname ?? t.waitingOpponent}
             rating={duel.opponent?.rating ?? null}
             topic={duel.opponent ? labelOf(duel.opponent.scope) : "—"}
             rankLevel={duel.opponent?.rankLevel ?? null}
             rareEquipped={duel.opponent?.rareEquipped ?? 0}
+            gender={duel.opponent?.gender ?? null}
+            archetype={duel.opponent?.archetype ?? null}
+            equipped={duel.opponent?.equipped ?? {}}
+            score={duel.opponent?.score ?? 0}
+            hit={hitSide === "opponent"}
             advantage={
               duel.opponent != null &&
               duel.opponent.rankLevel + duel.opponent.rareEquipped >
@@ -621,8 +717,37 @@ export default function DuelPage() {
             levelLabel={t.levelShort}
           />
         </div>
+
+        {/* Ustunlik chizig'i: ikki tomon hisobi ulushiga qarab o'rtadan siljiydi */}
+        <div className="mt-4">
+          <div className="flex items-center justify-center gap-3">
+            <span className="font-display text-2xl font-bold tracking-[0.04em] text-zar sm:text-3xl">
+              {duel.me.score}
+            </span>
+            <span aria-hidden className="text-base text-dust sm:text-lg">
+              ⚔️
+            </span>
+            <span className="font-display text-2xl font-bold tracking-[0.04em] text-feruza-bright sm:text-3xl">
+              {duel.opponent?.score ?? 0}
+            </span>
+          </div>
+          <div className="relative mt-2 h-2.5 overflow-hidden rounded-full bg-steel-2">
+            <div
+              className="absolute inset-y-0 left-0 bg-[linear-gradient(90deg,#c8a247,#f3d98b)] transition-[width] duration-500 ease-out"
+              style={{ width: `${powerShare(duel.me.score, duel.opponent?.score ?? 0)}%` }}
+            />
+            <div
+              className="absolute inset-y-0 right-0 bg-[linear-gradient(270deg,#4fc7c2,#2f8f8a)] transition-[width] duration-500 ease-out"
+              style={{ width: `${100 - powerShare(duel.me.score, duel.opponent?.score ?? 0)}%` }}
+            />
+          </div>
+          <p className="mt-1.5 text-center font-display text-[10px] uppercase tracking-[0.3em] text-dust">
+            {duel.phase === "RUNNING" ? t.seconds(duel.secondsLeft) : t.score}
+          </p>
+        </div>
+
         {duel.phase === "RUNNING" && (
-          <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-steel-2">
+          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-steel-2">
             <div
               className="h-full bg-[linear-gradient(90deg,#f3d98b,#c8a247)] transition-[width] duration-1000 ease-linear"
               style={{ width: `${(duel.secondsLeft / 60) * 100}%` }}
@@ -696,6 +821,41 @@ export default function DuelPage() {
           <p className="font-display text-[11px] font-semibold uppercase tracking-[0.3em] text-zar/90">
             {t.timeUp}
           </p>
+
+          <div className="mx-auto mt-5 flex max-w-xs items-end justify-center gap-6 sm:max-w-sm">
+            <div
+              className={`transition-[filter,opacity] duration-700 ${
+                duel.outcome === "LOSS"
+                  ? "opacity-40 grayscale"
+                  : duel.outcome === "WIN"
+                    ? "drop-shadow-[0_0_20px_rgba(200,162,71,0.65)]"
+                    : ""
+              }`}
+            >
+              <WarriorFigure gender={duel.me.gender} archetype={duel.me.archetype} equipped={duel.me.equipped} size={92} />
+            </div>
+            {duel.opponent && (
+              <div className="scale-x-[-1]">
+                <div
+                  className={`transition-[filter,opacity] duration-700 ${
+                    duel.outcome === "WIN"
+                      ? "opacity-40 grayscale"
+                      : duel.outcome === "LOSS"
+                        ? "drop-shadow-[0_0_20px_rgba(79,199,194,0.65)]"
+                        : ""
+                  }`}
+                >
+                  <WarriorFigure
+                    gender={duel.opponent.gender}
+                    archetype={duel.opponent.archetype}
+                    equipped={duel.opponent.equipped}
+                    size={92}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
           <h2
             className={`mt-4 font-display text-3xl font-bold uppercase tracking-[0.06em] sm:text-4xl ${
               duel.outcome === "WIN"
@@ -737,16 +897,22 @@ export default function DuelPage() {
 }
 
 /**
- * Tablodagi bir tomon. Ism, reyting, mavzu va ball bilan bir qatorda daraja
- * va nodir jihozlar soni ham ko'rinadi — ustunlik shulardan kelib chiqadi,
- * shuning uchun bola nega ustun ekanini ko'rishi kerak (⚔ belgisi).
+ * Jang maydonidagi bir jangchi: siluet + ism, reyting, mavzu, daraja va
+ * nodir jihozlar. `hit` — shu tomon hozir zarba urganda (to'g'ri javob)
+ * qisqa hujum animatsiyasi va uchib chiquvchi «+1» belgisini ko'rsatadi.
+ * Raqib siluyeti oynadek aks ettiriladi — ikkalasi bir-biriga qarab turadi.
  */
-function Sideboard({
+function Fighter({
   name,
   rating,
   topic,
   rankLevel,
   rareEquipped = 0,
+  gender,
+  archetype,
+  equipped,
+  score,
+  hit = false,
   advantage = false,
   advantageLabel,
   levelLabel,
@@ -757,6 +923,11 @@ function Sideboard({
   topic: string;
   rankLevel: number | null;
   rareEquipped?: number;
+  gender: "MALE" | "FEMALE" | null;
+  archetype: string | null;
+  equipped: Partial<Record<"HEAD" | "BODY" | "WEAPON" | "SHIELD" | "ACCESSORY", string>>;
+  score: number;
+  hit?: boolean;
   advantage?: boolean;
   advantageLabel: string;
   levelLabel: string;
@@ -768,22 +939,36 @@ function Sideboard({
     </span>
   );
   return (
-    <div className={`min-w-0 flex-1 ${mine ? "text-left" : "text-right"}`}>
+    <div className="flex min-w-0 flex-1 flex-col items-center gap-1 text-center">
+      <div className={`relative ${hit ? "tt-lunge" : ""}`}>
+        <div className={mine ? "" : "scale-x-[-1]"}>
+          <WarriorFigure gender={gender} archetype={archetype} equipped={equipped} size={76} />
+        </div>
+        {hit && (
+          <span
+            key={score}
+            aria-hidden
+            className="tt-dmg-float pointer-events-none absolute left-1/2 top-2 font-display text-lg font-bold text-zar-bright"
+          >
+            +1
+          </span>
+        )}
+      </div>
       <p
-        className={`flex items-center gap-1.5 truncate font-display text-[11px] font-semibold uppercase tracking-[0.22em] ${
-          mine ? "text-zar" : "flex-row-reverse justify-end text-feruza-bright"
+        className={`flex items-center gap-1.5 truncate font-display text-[11px] font-semibold uppercase tracking-[0.2em] ${
+          mine ? "text-zar" : "text-feruza-bright"
         }`}
       >
         {badge}
-        <span className="truncate">{name}</span>
+        <span className="max-w-[6.5rem] truncate sm:max-w-[9rem]">{name}</span>
       </p>
-      <p className="mt-1 truncate text-xs text-dust">
+      <p className="truncate text-[11px] text-dust">
         {rating !== null && <span className="text-marble">{rating}</span>}
         {rating !== null && " · "}
         {topic}
       </p>
       {rankLevel !== null && (
-        <p className="mt-0.5 truncate text-[11px] text-dust/70">
+        <p className="truncate text-[10px] text-dust/70">
           {levelLabel} {rankLevel}
           {rareEquipped > 0 ? ` · 💎×${rareEquipped}` : ""}
         </p>

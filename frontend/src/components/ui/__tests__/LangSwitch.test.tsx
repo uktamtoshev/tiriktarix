@@ -24,16 +24,17 @@ beforeEach(() => {
 });
 
 describe("LangSwitch", () => {
-  it("sukut bo'yicha ruscha yoqilgan bo'ladi", async () => {
+  it("sukut bo'yicha ruscha yoqilgan bo'ladi va UA tugmasi yo'q (O'zbekiston tarixi)", async () => {
     const { LangSwitch } = await load();
     render(<LangSwitch />);
 
     expect(screen.getByRole("button", { name: "RU" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("button", { name: "UZ" })).toHaveAttribute("aria-pressed", "false");
-    expect(screen.getByRole("button", { name: "UA" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.queryByRole("button", { name: "UA" })).not.toBeInTheDocument();
   });
 
-  it("uchta til ham tanlanadi", async () => {
+  it("Rossiya tarixida uchta til ham tanlanadi", async () => {
+    window.localStorage.setItem("tirik-mamlakat", "RU");
     const user = userEvent.setup();
     const { LangSwitch, useT } = await load();
 
@@ -54,6 +55,27 @@ describe("LangSwitch", () => {
 
     await user.click(screen.getByRole("button", { name: "UZ" }));
     expect(screen.getByText("Sinovlar")).toBeInTheDocument();
+  });
+
+  it("O'zbekiston tarixida UA tugmasi yo'q, ukraincha yoqilgan bo'lsa ruschaga qaytadi", async () => {
+    window.localStorage.setItem("tirik-mamlakat", "UZ");
+    window.localStorage.setItem("tirik-til", "uk");
+    const { LangSwitch, useT } = await load();
+
+    function Probe() {
+      return <p>{useT(TXT)}</p>;
+    }
+
+    render(
+      <>
+        <LangSwitch />
+        <Probe />
+      </>,
+    );
+
+    expect(screen.queryByRole("button", { name: "UA" })).not.toBeInTheDocument();
+    expect(await screen.findByText("Испытания")).toBeInTheDocument();
+    expect(window.localStorage.getItem("tirik-til")).toBe("ru");
   });
 
   it("bosilganda til almashadi va tanlov saqlanadi", async () => {
