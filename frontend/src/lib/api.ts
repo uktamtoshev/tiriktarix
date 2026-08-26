@@ -1,6 +1,11 @@
 // Tirik tarix backend API mijozi.
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+// Docker sborkasida NEXT_PUBLIC_API_URL berilmaydi, shuning uchun standart
+// qiymat — ishlab chiqarish manzili: aks holda brauzer har bir foydalanuvchi
+// kompyuteridagi localhost:8080 ga urinib ko'rardi. Lokal ishlash uchun
+// `.env.development` faylida localhost yozilgan — uni `next dev` o'zi o'qiydi.
+export const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "https://api.tiriktarix.uz";
 
 export type Era = {
   id: number;

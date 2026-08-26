@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+// api.ts dagi bilan bir xil qoida: standart qiymat — ishlab chiqarish manzili,
+// lokal qiymat esa `.env.development` dan keladi (uni `next dev` o'zi o'qiydi).
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "https://api.tiriktarix.uz";
 
 const nextConfig: NextConfig = {
   /**

@@ -31,8 +31,9 @@ server:
 tirik-tarix:
   cors:
     # Vergul bilan ajratiladi. 3000 — standart `npm run dev`, 55708 — port band
-    # bo'lganda ishlatiladigan zaxira port.
-    allowed-origins: ${TIRIK_TARIX_CORS_ORIGINS:http://localhost:3000,http://localhost:55708}
+    # bo'lganda ishlatiladigan zaxira port, tiriktarix.uz — ishlab chiqarishdagi
+    # sayt (serverdagi env-file uni bermagani uchun standart qiymatda turadi).
+    allowed-origins: ${TIRIK_TARIX_CORS_ORIGINS:http://localhost:3000,http://localhost:55708,https://tiriktarix.uz}
   chat:
     # M1 qat'iy qoidalar: javob faqat tasdiqlangan fakt kartochkasidan
     refusal-no-fact: "Bu haqda tarix sukut saqlaydi."

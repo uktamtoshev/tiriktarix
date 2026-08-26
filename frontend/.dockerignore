@@ -1,0 +1,7 @@
+# Docker sborkasi toza bo'lsin: lokal keshlar va shaxsiy env fayllar kirmasin.
+# Ayniqsa .env.local muhim: unda lokal API manzili bor va u prod bandlega
+# NEXT_PUBLIC_* sifatida «pishib» qolishi mumkin.
+node_modules
+.next
+.env.local
+.env.*.local
